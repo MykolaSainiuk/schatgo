@@ -1,0 +1,23 @@
+version: '3.9'
+
+networks:
+  schat_network:
+    name: schat_network
+    driver: bridge
+
+services:
+  schat_mongodb:
+    image: mongodb/mongodb-community-server:7.0.1-ubi8
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - ${DB_PORT:-27017}:27017
+    volumes:
+      # - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - schat_mongodb_volume:/data/db
+    networks:
+      - schat_network
+
+volumes:
+  schat_mongodb_volume:
