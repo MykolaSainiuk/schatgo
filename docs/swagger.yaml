@@ -1,0 +1,16 @@
+basePath: /
+host: localhost:5000
+info:
+  contact:
+    name: mykola.sainyuk@gmail.com
+    url: https://www.linkedin.com/in/mykola-sainiuk-3b03168b/
+  description: sChat REST server
+  title: sChat Server API
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

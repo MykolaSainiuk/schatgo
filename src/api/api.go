@@ -7,8 +7,7 @@ import (
 )
 
 func InitRoutes(r chi.Router) {
-	// test route
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello world!"))
+		w.Write([]byte("It's root path, baby!"))
 	})
 }

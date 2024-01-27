@@ -1,0 +1,22 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "sChat REST server",
+        "title": "sChat Server API",
+        "contact": {
+            "name": "mykola.sainyuk@gmail.com",
+            "url": "https://www.linkedin.com/in/mykola-sainiuk-3b03168b/"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:5000",
+    "basePath": "/",
+    "paths": {},
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

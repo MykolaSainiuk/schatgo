@@ -39,7 +39,7 @@ func main() {
 	case <-stoppedServerCh:
 		slog.Info("Server closed somehow")
 	case sig = <-signalsCh:
-		slog.Info("SIGTERM signal caught", sig)
+		slog.Info("SIGTERM signal caught", slog.String("signal", sig.String()))
 	}
 
 	if sig != nil {

@@ -31,7 +31,7 @@ func ConnectDB(dbName string) (*DB, error) {
 	var client *mongo.Client
 	// simply establish connection
 	if client, err = mongo.Connect(dbConnCtx, conn); err != nil {
-		slog.Error("Cannot connect MongoDb instance", slog.Any("error:", err.Error()))
+		slog.Error("Cannot connect MongoDb instance", slog.Any("error", err.Error()))
 		dbConnCancelFn()
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func ConnectDB(dbName string) (*DB, error) {
 
 	// check access
 	if err = client.Ping(dbConnCtx, readpref.Primary()); err != nil {
-		slog.Error("Cannot reach primary read replica", slog.Any("error:", err.Error()))
+		slog.Error("Cannot reach primary read replica", slog.Any("error", err.Error()))
 		dbConnCancelFn()
 		return nil, err
 	}

@@ -26,4 +26,4 @@ logs
 # ENV
 *.env
 
-
+./readme
