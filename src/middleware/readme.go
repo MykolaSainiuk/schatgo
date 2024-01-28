@@ -28,7 +28,7 @@ func Readme(r chi.Router) http.HandlerFunc {
 func writeDownDoc(fpath string, content *string) {
 	f, err := os.OpenFile(fpath, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
-		slog.Error("Cannot open file", slog.Any("error", err.Error()))
+		slog.Error("cannot open file", slog.Any("error", err.Error()))
 		return
 	}
 	defer f.Close()

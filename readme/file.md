@@ -11,12 +11,22 @@ Welcome to the schatgo API documentation
 - [RequestID]()
 - [o-chi/chi/v5.Middlewares.Handler-fm]()
 - [Recoverer]()
-- [github.com/MykolaSainiuk/schatgo/src/server.SetupRouter.Timeout.func1]()
+- [Timeout.func1]()
 - [o-chi/cors.(*Cors).Handler-fm]()
-- [github.com/MykolaSainiuk/schatgo/src/server.SetupRouter.Heartbeat.func2]()
-- [github.com/MykolaSainiuk/schatgo/src/server.SetupRouter.Heartbeat.func3]()
+- [SetHeader.func1]()
+- [Heartbeat.func1]()
+- [Heartbeat.func1]()
+- [Heartbeat.func1]()
+- **/favicon***
+	- _*_
+		- [NotFound.func1]()
+
+</details>
+
+Total # of routes: 1
+o/src/server.SetupRouter.Heartbeat.func3]()
 - [github.com/MykolaSainiuk/schatgo/src/server.SetupRouter.Heartbeat.func4]()
-- [github.com/MykolaSainiuk/schatgo/src/server.SetupRouter.SetHeader.func5]()
+- [github.com/MykolaSainiuk/schatgo/src/server.SetupRouter.Heartbeat.func5]()
 - **/favicon***
 	- _*_
 		- [github.com/MykolaSainiuk/schatgo/src/server.SetupRouter.Favicon.NotFound.func9]()

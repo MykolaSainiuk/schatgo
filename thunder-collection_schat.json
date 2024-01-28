@@ -1,0 +1,233 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "schat",
+    "dateExported": "2024-01-27T09:07:48.034Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "04891995-0334-46d9-92f1-448643e1eff6",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "new chat message",
+            "url": "http://localhost:{{port}}/api/message/{{chatId}}/new",
+            "method": "PUT",
+            "sortNum": 68.3,
+            "created": "2024-01-27T09:05:59.023Z",
+            "modified": "2024-01-27T09:07:15.074Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"text\": \"Hey!\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "abfb8806-8149-4bfd-a7ac-7f366e4b4555",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "list chat messages",
+            "url": "http://localhost:{{port}}/api/message/{{chatId}}/list",
+            "method": "GET",
+            "sortNum": 136.7,
+            "created": "2024-01-27T09:00:44.841Z",
+            "modified": "2024-01-27T09:00:44.841Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "6c6e5c1b-eeb1-42a0-a771-69f26589dd3b",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "remove chat",
+            "url": "http://localhost:{{port}}/api/chat/remove/653182019948064d6444855c",
+            "method": "DELETE",
+            "sortNum": 273.4,
+            "created": "2024-01-27T09:00:44.840Z",
+            "modified": "2024-01-27T09:00:44.840Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "c718b887-e148-4cab-a448-17ffb7afb0ea",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "new chat",
+            "url": "http://localhost:{{port}}/api/chat/new",
+            "method": "PUT",
+            "sortNum": 312.5,
+            "created": "2024-01-27T09:00:44.836Z",
+            "modified": "2024-01-27T09:04:12.534Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\": \"Test User\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "3662efc4-a343-4c3e-a421-30d875dc453d",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "list my chats",
+            "url": "http://localhost:{{port}}/api/chat/list",
+            "method": "GET",
+            "sortNum": 468.8,
+            "created": "2024-01-27T09:00:44.839Z",
+            "modified": "2024-01-27T09:00:44.839Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "7dae0c0c-f4eb-4936-b45c-9cc38882a097",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "add contact",
+            "url": "http://localhost:{{port}}/api/user/contact/add",
+            "method": "PUT",
+            "sortNum": 625,
+            "created": "2024-01-27T09:00:44.835Z",
+            "modified": "2024-01-27T09:04:01.903Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\": \"Test User\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "46297230-9098-4f8c-83c5-320a8ea88bd8",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "list my ALL contacts",
+            "url": "http://localhost:{{port}}/api/user/contact/list/all",
+            "method": "GET",
+            "sortNum": 937.5,
+            "created": "2024-01-27T09:00:44.837Z",
+            "modified": "2024-01-27T09:00:44.837Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "a8bcffe3-664a-4dae-b53e-0c660d278c5a",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "me",
+            "url": "http://localhost:{{port}}/api/user/me",
+            "method": "GET",
+            "sortNum": 1250,
+            "created": "2024-01-27T09:00:44.834Z",
+            "modified": "2024-01-27T09:00:44.834Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "f39997d6-9093-4676-b257-974a1c1c3c90",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "login",
+            "url": "http://localhost:{{port}}/api/user/login",
+            "method": "POST",
+            "sortNum": 2500,
+            "created": "2024-01-27T09:00:44.833Z",
+            "modified": "2024-01-27T09:02:45.380Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"Mykola Sainiuk\",\n  \"password\": \"rusnipuzda\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "83c1ba65-47c8-44ce-8672-0cd7376c3ae4",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "register",
+            "url": "http://localhost:{{port}}/api/user/register",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-01-27T09:00:44.832Z",
+            "modified": "2024-01-27T09:00:44.832Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"Mykola Sainiuk\",\n  \"password\": \"rusnipuzda\",\n  \"avatarUri\": \"data:image/jpeg;base64,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\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "a677dc35-736d-4b48-93d8-1928dc5c4161",
+            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "containerId": "",
+            "name": "register [test]",
+            "url": "http://localhost:{{port}}/api/user/register",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-01-27T09:00:44.838Z",
+            "modified": "2024-01-27T09:00:44.838Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"Test User\",\n  \"password\": \"rusnipuzda\",\n  \"avatarUri\": \"https://cdn2.iconfinder.com/data/icons/character-line-color/512/character_person_user_lawyer_student-512.png\"\n}",
+                "form": []
+            },
+            "tests": []
+        }
+    ]
+}

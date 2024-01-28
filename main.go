@@ -27,7 +27,7 @@ func main() {
 	srv := server.Setup()
 	defer srv.Shutdown()
 
-	api.InitRoutes(srv.Router())
+	api.InitRoutes(srv)
 
 	stoppedServerCh := srv.Run()
 

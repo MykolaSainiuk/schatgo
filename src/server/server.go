@@ -10,12 +10,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 
-	db "github.com/MykolaSainiuk/schatgo/src/db"
+	"github.com/MykolaSainiuk/schatgo/src/common/types"
+	"github.com/MykolaSainiuk/schatgo/src/db"
+	"github.com/MykolaSainiuk/schatgo/src/helper/jwthelper"
 )
 
 type Server struct {
 	router chi.Router
-	db     *db.DB
+	db     types.IDatabase
 }
 
 func Setup() *Server {
@@ -23,7 +25,7 @@ func Setup() *Server {
 
 	dbConn, err := db.ConnectDB(os.Getenv("MONGO_INITDB_DATABASE"))
 	if err != nil {
-		slog.Error("Failed to connect MongoDB")
+		slog.Error("failed to connect MongoDB")
 		os.Exit(1)
 	}
 
@@ -33,10 +35,6 @@ func Setup() *Server {
 	}
 }
 
-func (srv *Server) Router() chi.Router {
-	return srv.router
-}
-
 func (srv *Server) Run() <-chan struct{} {
 	closingCh := make(chan struct{}, 1)
 	host := os.Getenv("HOST")
@@ -44,11 +42,11 @@ func (srv *Server) Run() <-chan struct{} {
 
 	// rest
 	go func() {
-		slog.Info("Server is up on port", slog.String("port", port))
+		slog.Info("server is up on port", slog.String("port", port))
 
 		err := http.ListenAndServe(host+":"+port, srv.router)
 		if err != nil {
-			slog.Error("Server has failed to serve", slog.Any("error", err.Error()))
+			slog.Error("server has failed to serve", slog.Any("error", err.Error()))
 		}
 
 		// reflect.ValueOf(ch).TrySend(reflect.ValueOf(struct{}{}))
@@ -59,17 +57,16 @@ func (srv *Server) Run() <-chan struct{} {
 }
 
 func (srv *Server) Shutdown() {
-	slog.Info("Closing server gracefully...")
+	slog.Info("Closing server gracefully")
+	srv.db.Shutdown()
+}
 
-	// drop DB connections
-	if srv.db.CancelFn != nil {
-		srv.db.CancelFn()
-	}
-	if srv.db.Client != nil && srv.db.Context != nil {
-		if err := srv.db.Client.Disconnect(srv.db.Context); err != nil {
-			slog.Error(err.Error())
-		}
-	}
+func (srv *Server) GetRouter() chi.Router {
+	return srv.router
+}
+
+func (srv *Server) GetDB() types.IDatabase {
+	return srv.db
 }
 
 // evn vars first
@@ -79,10 +76,10 @@ func init() {
 		slog.Error(".env file not found")
 		os.Exit(1)
 	}
-	slog.Info(".env file is loaded...")
+	slog.Info(".env file is loaded")
 
 	// load jwt secret & expr
-	// jwthelper.InitJwtData()
+	jwthelper.InitJwtData()
 }
 
 func getEnvFilePath() string {

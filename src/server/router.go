@@ -12,14 +12,12 @@ import (
 	"github.com/go-chi/httplog/v2"
 	"github.com/unrolled/secure"
 
-	customMiddleware "github.com/MykolaSainiuk/schatgo/src/server/middleware"
-	// ginSwagger "github.com/swaggo/gin-swagger"
-	// "github.com/swaggo/swag/example/basic/docs"
+	customMiddleware "github.com/MykolaSainiuk/schatgo/src/middleware"
 )
 
 func SetupRouter() chi.Router {
 	coresN := runtime.NumCPU()
-	slog.Info("Server server... on ", slog.Int("cores", coresN))
+	slog.Info("server runs on logical", slog.Int("cores", coresN))
 	runtime.GOMAXPROCS(coresN)
 
 	// init router
@@ -34,12 +32,10 @@ func SetupRouter() chi.Router {
 
 	logger := SetupLogger(os.Getenv("NODE_ENV"))
 	r.Use(httplog.RequestLogger(logger))
-	// r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	// Basic CORS
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -47,6 +43,8 @@ func SetupRouter() chi.Router {
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+
+	r.Use(middleware.SetHeader("Content-Type", "application/json"))
 
 	// hc := customMiddleware.HealthCheck()
 	// r.Handle("/health", hc)
@@ -56,19 +54,12 @@ func SetupRouter() chi.Router {
 	r.Use(middleware.Heartbeat("/health-check"))
 	r.Use(middleware.Heartbeat("/ping"))
 
-	r.Use(middleware.SetHeader("Content-Type", "application/json"))
-
 	r.Handle("/favicon*", customMiddleware.Favicon())
 
 	r.Get("/readme*", customMiddleware.Readme(r))
 	r.Get("/swagger/*", customMiddleware.Swagger())
 
 	r.NotFound(customMiddleware.NotFound())
-
-	// // swagger
-	// docs.SwaggerInfo.Schemes = []string{"http"}
-	// swaggerHandler := ginSwagger.WrapHandler(swaggerFiles.Handler)
-	// server.GET("/swagger/*any", swaggerHandler)
 
 	return r
 }

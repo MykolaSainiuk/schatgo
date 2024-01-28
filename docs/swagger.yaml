@@ -1,4 +1,70 @@
 basePath: /
+definitions:
+  dto.LoginInputDto:
+    properties:
+      name:
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - name
+    - password
+    type: object
+  dto.LoginOutputDto:
+    properties:
+      access_token:
+        type: string
+    required:
+    - access_token
+    type: object
+  dto.RegisterInputDto:
+    properties:
+      avatarUri:
+        type: string
+      name:
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - avatarUri
+    - name
+    - password
+    type: object
+  dto.RegisterResponseDto:
+    properties:
+      userId:
+        type: string
+    type: object
+  httpexp.HttpExp:
+    description: common 422 respons
+    properties:
+      details:
+        items:
+          type: string
+        type: array
+      message:
+        type: string
+    type: object
+  model.User:
+    properties:
+      avatar_uri:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - avatar_uri
+    - name
+    type: object
 host: localhost:5000
 info:
   contact:
@@ -7,7 +73,78 @@ info:
   description: sChat REST server
   title: sChat Server API
   version: "1.0"
-paths: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Make access token for user
+      parameters:
+      - description: Registration form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginInputDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginOutputDto'
+        "422":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register user with name & avatar
+      parameters:
+      - description: Registration form
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterInputDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.RegisterResponseDto'
+        "422":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      summary: Register user
+      tags:
+      - auth
+  /user/me:
+    get:
+      description: ME endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: Get user info
+      tags:
+      - user
 securityDefinitions:
   BearerAuth:
     in: header

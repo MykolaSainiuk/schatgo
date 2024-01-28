@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-type DB struct {
+type Database struct {
 	Database    *mongo.Database
 	Client      *mongo.Client
 	Name        string
@@ -22,7 +22,7 @@ type DB struct {
 
 const DB_CONN_TIMEOUT int = 10
 
-func ConnectDB(dbName string) (*DB, error) {
+func ConnectDB(dbName string) (*Database, error) {
 	conn := options.Client().ApplyURI(os.Getenv("MONGO_URI"))
 	// set db conn timeout try
 	dbConnCtx, dbConnCancelFn := context.WithTimeout(context.Background(), time.Duration(DB_CONN_TIMEOUT)*time.Second)
@@ -35,7 +35,7 @@ func ConnectDB(dbName string) (*DB, error) {
 		dbConnCancelFn()
 		return nil, err
 	}
-	slog.Info("MongoDB client connected successfully...")
+	slog.Info("MongoDB client connected successfully")
 
 	// check access
 	if err = client.Ping(dbConnCtx, readpref.Primary()); err != nil {
@@ -43,14 +43,14 @@ func ConnectDB(dbName string) (*DB, error) {
 		dbConnCancelFn()
 		return nil, err
 	}
-	slog.Info("MongoDB access checked successfully...")
+	slog.Info("MongoDB access checked successfully")
 
 	// create empty db if there is no such
 	dbInst := client.Database(dbName)
 	// "migrations"
 	collections := RollUpAndGetCollections(dbInst, dbName)
 
-	db := &DB{
+	db := &Database{
 		Database:    client.Database(dbName),
 		Client:      client,
 		Name:        dbName,
@@ -71,11 +71,23 @@ func RollUpAndGetCollections(db *mongo.Database, dbName string) map[string]*mong
 	collections["messages"] = db.Collection("messages")
 	collections["tokens"] = db.Collection("tokens")
 
-	slog.Info("MongoDB metadata rolled up successfully...")
+	slog.Info("MongoDB metadata rolled up successfully")
 
 	return collections
 }
 
-func (db *DB) GetCollection(name string) *mongo.Collection {
+func (db *Database) GetCollection(name string) *mongo.Collection {
 	return db.Collections[name]
+}
+
+func (db *Database) Shutdown() {
+	// drop DB connections
+	if db.CancelFn != nil {
+		db.CancelFn()
+	}
+	if db.Client != nil && db.Context != nil {
+		if err := db.Client.Disconnect(db.Context); err != nil {
+			slog.Error(err.Error())
+		}
+	}
 }
