@@ -50,6 +50,7 @@ func (repo *UserRepo) GetUserByID(ctx context.Context, id string) (*model.User, 
 	var user *model.User
 	var err error
 	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}).Decode(&user); err != nil {
+		slog.Error("cannot retrieve user from users collection", slog.String("error", err.Error()))
 		return nil, err
 	}
 	if user == nil {
@@ -90,6 +91,18 @@ func (repo *UserRepo) GetUserByName(ctx context.Context, name string) (*model.Us
 	return user, nil
 }
 
+func (repo *UserRepo) AddContact(ctx context.Context, id string, name string) error {
+	contactUser, err := repo.GetUserByName(ctx, name)
+	if err != nil {
+		return err
+	}
+
+	_id, _ := primitive.ObjectIDFromHex(id)
+	r, err := repo.collection.UpdateByID(ctx, contactUser.ID, bson.M{"$addToSet": bson.M{"contacts": _id}})
+
+	return handleUpdateError(err, r.MatchedCount, id)
+}
+
 func (repo *UserRepo) UpdateUser(ctx context.Context, id primitive.ObjectID, keyValueMap map[string]any) error {
 	setData := make(bson.D, len(keyValueMap))
 	i := 0
@@ -108,7 +121,7 @@ func (repo *UserRepo) UpdateUser(ctx context.Context, id primitive.ObjectID, key
 
 func handleUpdateError(err error, matchedCount int64, id string) error {
 	if err != nil {
-		slog.Error("cannot update user into users collection", slog.String("error", err.Error()))
+		slog.Error("cannot update user of users collection", slog.String("error", err.Error()))
 		return err
 	}
 	if matchedCount == 0 {
@@ -131,4 +144,35 @@ func (repo *UserRepo) DeleteUser(ctx context.Context, id string) error {
 
 	slog.Info("deleted user", slog.String("ID", id))
 	return err
+}
+
+func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string) ([]model.User, error) {
+	_id, _ := primitive.ObjectIDFromHex(id)
+
+	matchStage := bson.D{{Key: "$match", Value: bson.D{{Key: "_id", Value: _id}}}}
+	ls := bson.D{
+		{Key: "from", Value: "users"},
+		{Key: "localField", Value: "contacts"},
+		{Key: "foreignField", Value: "_id"},
+		{Key: "as", Value: "contacts"},
+	}
+	lookupStage := bson.D{{Key: "$lookup", Value: ls}}
+	// unwindStage := bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$contacts"}}}}
+	// projectStage := bson.D{{Key: "$project", Value: bson.D{
+	// 	{Key: "_id", Value: "$_id"},
+	// 	{Key: "name", Value: "$contacts.name"},
+	// 	{Key: "avatar_uri", Value: "$contacts.avatar_uri"},
+
+	// }}
+	var contacts []model.User
+	cursor, err := repo.collection.Aggregate(ctx, mongo.Pipeline{matchStage, lookupStage})
+	if err = cursor.All(ctx, &contacts); err != nil {
+		slog.Error("cannot retrieve user from users collection", slog.String("error", err.Error()))
+		return nil, err
+	}
+	// if user == nil {
+	// 	return nil, cmnerr.ErrNotFoundEntity
+	// }
+
+	return contacts, err
 }

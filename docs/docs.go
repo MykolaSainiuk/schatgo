@@ -131,6 +131,18 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.AddContactInputDto": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 2
+                }
+            }
+        },
         "dto.GetMeOutputDto": {
             "type": "object",
             "properties": {

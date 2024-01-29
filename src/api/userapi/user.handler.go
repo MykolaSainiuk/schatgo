@@ -2,8 +2,11 @@ package userapi
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
+	"github.com/MykolaSainiuk/schatgo/src/api/dto"
+	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/httpexp"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/server"
@@ -26,7 +29,7 @@ func NewUserHandler(srv *server.Server) *UserHandler {
 //	@Tags			user
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Success		200		{object}	dto.GetMeOutputDto	"User object"
+//	@Success		200		{object}	dto.UserInfoOutputDto	"User object"
 //	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
 //	@Router			/user/me [get]
 func (handler *UserHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
@@ -35,16 +38,16 @@ func (handler *UserHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) 
 
 	user, err := handler.UserService.GetUser(ctx, userID)
 	if err != nil {
-		httpexp.FromError(err, http.StatusNotFound).SetMessage("user not found").Reply(w)
+		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
+			httpexp.UserNotFoundExp.Reply(w)
+			return
+		}
+		cmnerr.LogAndReply500(w, err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(struct {
-		ID        string `json:"id"`
-		Name      string `json:"name"`
-		AvatarUri string `json:"avatarUri"`
-	}{
+	res, _ := json.Marshal(dto.UserInfoOutputDto{
 		ID:        user.ID.Hex(),
 		Name:      user.Name,
 		AvatarUri: user.AvatarUri})

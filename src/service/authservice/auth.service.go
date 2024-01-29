@@ -36,6 +36,7 @@ func (service *AuthService) RegisterNewUser(ctx context.Context, dto *dto.Regist
 		AvatarUri: dto.AvatarUri,
 
 		Hash: hash,
+		Contacts: make([]model.User, 0),
 
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),

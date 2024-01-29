@@ -1,5 +1,13 @@
 basePath: /
 definitions:
+  dto.AddContactInputDto:
+    properties:
+      name:
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
   dto.GetMeOutputDto:
     properties:
       avatarUri:

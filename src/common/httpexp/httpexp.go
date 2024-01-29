@@ -64,3 +64,8 @@ func (e *HttpExp) Reply(w http.ResponseWriter) {
 
 	w.Write(res)
 }
+
+// some common http exceptions
+var (
+	UserNotFoundExp = FromText("user not found", http.StatusNotFound)
+)

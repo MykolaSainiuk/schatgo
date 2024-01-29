@@ -8,6 +8,7 @@ import (
 
 	"github.com/MykolaSainiuk/schatgo/src/api/authapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/userapi"
+	"github.com/MykolaSainiuk/schatgo/src/api/userapi/contactapi"
 )
 
 func apiRouter(srv *server.Server) chi.Router {
@@ -15,10 +16,9 @@ func apiRouter(srv *server.Server) chi.Router {
 
 	AuthOnly := middleware.Authorized(srv.GetDB())
 
-	authHandler := authapi.NewAuthHandler(srv)
-	userHandler := userapi.NewUserHandler(srv)
-
 	r.Group(func(r chi.Router) {
+		authHandler := authapi.NewAuthHandler(srv)
+
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/register", authHandler.RegisterUser)
 			r.Post("/login", authHandler.LoginUser)
@@ -27,7 +27,17 @@ func apiRouter(srv *server.Server) chi.Router {
 
 	r.Group(func(r chi.Router) {
 		r.Use(AuthOnly)
+		userHandler := userapi.NewUserHandler(srv)
 		r.Get("/user/me", userHandler.GetUserInfo)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(AuthOnly)
+		contactHandler := contactapi.NewContactHandler(srv)
+		r.Route("/user/contact", func(r chi.Router) {
+			r.Put("/add", contactHandler.AddContact)
+			r.Get("/list/all", contactHandler.ListAllContacts)
+		})
 	})
 
 	return r

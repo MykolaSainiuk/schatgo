@@ -98,15 +98,7 @@ func (handler *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	accessToken, err := handler.authService.LoginUser(ctx, body.Name, body.Password)
 	if err != nil {
-		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
-			httpexp.FromError(err, http.StatusUnauthorized).SetMessage(MsgFailedToLogin).Reply(w)
-			return
-		}
-		if errors.Is(err, cmnerr.ErrHashMismatch) {
-			httpexp.FromError(err, http.StatusUnauthorized).SetMessage(MsgFailedToLogin).Reply(w)
-			return
-		}
-		if errors.Is(err, cmnerr.ErrGenerateAccessToken) {
+		if errors.Is(err, cmnerr.ErrNotFoundEntity) || errors.Is(err, cmnerr.ErrHashMismatch) || errors.Is(err, cmnerr.ErrGenerateAccessToken) {
 			httpexp.FromError(err, http.StatusUnauthorized).SetMessage(MsgFailedToLogin).Reply(w)
 			return
 		}

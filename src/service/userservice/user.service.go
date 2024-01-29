@@ -21,3 +21,11 @@ func NewUserService(srv *server.Server) *UserService {
 func (service *UserService) GetUser(ctx context.Context, userID string) (*model.User, error) {
 	return service.userRepo.GetUserByID(ctx, userID)
 }
+
+func (service *UserService) AddContact(ctx context.Context, userID string, contactName string) error {
+	return service.userRepo.AddContact(ctx, userID, contactName)
+}
+
+func (service *UserService) GetAllContacts(ctx context.Context, userID string) ([]model.User, error) {
+	return service.userRepo.GetUserContactsByID(ctx, userID)
+}
