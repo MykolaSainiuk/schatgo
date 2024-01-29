@@ -31,7 +31,7 @@ func SetupRouter() chi.Router {
 	// r.Use(middleware.RealIP)
 
 	logger := SetupLogger(os.Getenv("NODE_ENV"))
-	r.Use(httplog.RequestLogger(logger))
+	r.Use(httplog.RequestLogger(logger, LogPathsToSkip))
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))

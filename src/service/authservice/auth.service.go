@@ -5,10 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/pkg/errors"
-
+	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
-	"github.com/MykolaSainiuk/schatgo/src/dto"
 	"github.com/MykolaSainiuk/schatgo/src/helper/jwthelper"
 	"github.com/MykolaSainiuk/schatgo/src/helper/pwdhelper"
 	"github.com/MykolaSainiuk/schatgo/src/model"
@@ -29,7 +27,8 @@ func NewAuthService(srv *server.Server) *AuthService {
 func (service *AuthService) RegisterNewUser(ctx context.Context, dto *dto.RegisterInputDto) (string, error) {
 	hash, err := pwdhelper.HashPassword(dto.Password)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to hash password")
+		slog.Error("failed to generate hash", slog.Any("error", err))
+		return "", cmnerr.ErrHashGeneration
 	}
 
 	newUser := &model.User{

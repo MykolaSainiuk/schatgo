@@ -115,9 +115,9 @@ const docTemplate = `{
                 "summary": "Get user info",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "User object",
                         "schema": {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/dto.GetMeOutputDto"
                         }
                     },
                     "404": {
@@ -131,6 +131,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.GetMeOutputDto": {
+            "type": "object",
+            "properties": {
+                "avatarUri": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.LoginInputDto": {
             "type": "object",
             "required": [
@@ -150,11 +164,8 @@ const docTemplate = `{
         },
         "dto.LoginOutputDto": {
             "type": "object",
-            "required": [
-                "access_token"
-            ],
             "properties": {
-                "access_token": {
+                "token": {
                     "type": "string"
                 }
             }
@@ -183,7 +194,7 @@ const docTemplate = `{
         "dto.RegisterResponseDto": {
             "type": "object",
             "properties": {
-                "userId": {
+                "id": {
                     "type": "string"
                 }
             }
@@ -199,30 +210,6 @@ const docTemplate = `{
                     }
                 },
                 "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.User": {
-            "type": "object",
-            "required": [
-                "avatar_uri",
-                "name"
-            ],
-            "properties": {
-                "avatar_uri": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updated_at": {
                     "type": "string"
                 }
             }

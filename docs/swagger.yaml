@@ -1,5 +1,14 @@
 basePath: /
 definitions:
+  dto.GetMeOutputDto:
+    properties:
+      avatarUri:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   dto.LoginInputDto:
     properties:
       name:
@@ -14,10 +23,8 @@ definitions:
     type: object
   dto.LoginOutputDto:
     properties:
-      access_token:
+      token:
         type: string
-    required:
-    - access_token
     type: object
   dto.RegisterInputDto:
     properties:
@@ -36,7 +43,7 @@ definitions:
     type: object
   dto.RegisterResponseDto:
     properties:
-      userId:
+      id:
         type: string
     type: object
   httpexp.HttpExp:
@@ -48,22 +55,6 @@ definitions:
         type: array
       message:
         type: string
-    type: object
-  model.User:
-    properties:
-      avatar_uri:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updated_at:
-        type: string
-    required:
-    - avatar_uri
-    - name
     type: object
 host: localhost:5000
 info:
@@ -133,9 +124,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User object
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/dto.GetMeOutputDto'
         "404":
           description: Not found user
           schema:

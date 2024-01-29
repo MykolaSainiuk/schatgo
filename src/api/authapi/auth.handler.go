@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
+	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/httpexp"
-	"github.com/MykolaSainiuk/schatgo/src/dto"
 	"github.com/MykolaSainiuk/schatgo/src/server"
 	"github.com/MykolaSainiuk/schatgo/src/service/authservice"
 )
@@ -57,6 +57,8 @@ func (handler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request)
 			httpexp.FromError(err, http.StatusUnprocessableEntity).SetMessage("such name is already occupied").Reply(w)
 			return
 		}
+		// if errors.Is(err, cmnerr.ErrHashGeneration) {
+		// }
 		cmnerr.LogAndReply500(w, err)
 		return
 	}

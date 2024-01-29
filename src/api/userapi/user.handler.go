@@ -26,8 +26,8 @@ func NewUserHandler(srv *server.Server) *UserHandler {
 //	@Tags			user
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Success		200	{object}	model.User
-//	@Failure		404	{object}	httpexp.HttpExp	"Not found user"
+//	@Success		200		{object}	dto.GetMeOutputDto	"User object"
+//	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
 //	@Router			/user/me [get]
 func (handler *UserHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

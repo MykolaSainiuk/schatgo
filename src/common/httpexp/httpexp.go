@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strings"
 )
 
 // InvalidResponseDto
@@ -48,10 +49,18 @@ func (e *HttpExp) Reply(w http.ResponseWriter) {
 		slog.Error("failed to marshal http exception", slog.Any("error", err))
 		return
 	}
-	// slog.Debug(e.Message,
-	// 	slog.Int("status", int(e.StatusCode)),
-	// 	slog.Any("error", e.Error),
-	// 	slog.String("msg", strings.Join(e.Details, "; ")),
-	// )
+	if e.Details != nil {
+		slog.Debug(e.Message,
+			slog.Int("status", int(e.StatusCode)),
+			slog.Any("error", e.Error),
+			slog.String("msg", strings.Join(e.Details, "; ")),
+		)
+	} else {
+		slog.Debug(e.Message,
+			slog.Int("status", int(e.StatusCode)),
+			slog.Any("error", e.Error),
+		)
+	}
+
 	w.Write(res)
 }

@@ -35,3 +35,18 @@ func SetupLogger(env string) *httplog.Logger {
 		// SourceFieldName: "source",
 	})
 }
+
+var LogPathsToSkip = []string{
+	"/",
+	"/favicon.ico",
+	"/favicon",
+	"/health",
+	"/health-check",
+	"/ping",
+	"/swagger/index.html",
+	"/swagger/swagger-ui.css",
+	"/swagger/swagger-ui-standalone-preset.js",
+	"/swagger/swagger-ui-bundle.js",
+	"/swagger/favicon-32x32.png",
+	"/swagger/doc.json",
+}
