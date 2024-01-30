@@ -157,22 +157,19 @@ func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string) ([]mod
 		{Key: "as", Value: "contacts"},
 	}
 	lookupStage := bson.D{{Key: "$lookup", Value: ls}}
-	// unwindStage := bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$contacts"}}}}
-	// projectStage := bson.D{{Key: "$project", Value: bson.D{
-	// 	{Key: "_id", Value: "$_id"},
-	// 	{Key: "name", Value: "$contacts.name"},
-	// 	{Key: "avatar_uri", Value: "$contacts.avatar_uri"},
 
-	// }}
 	var contacts []model.User
 	cursor, err := repo.collection.Aggregate(ctx, mongo.Pipeline{matchStage, lookupStage})
+	if err != nil {
+		slog.Error("cannot retrieve user from users collection", slog.String("error", err.Error()))
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	
 	if err = cursor.All(ctx, &contacts); err != nil {
 		slog.Error("cannot retrieve user from users collection", slog.String("error", err.Error()))
 		return nil, err
 	}
-	// if user == nil {
-	// 	return nil, cmnerr.ErrNotFoundEntity
-	// }
 
 	return contacts, err
 }

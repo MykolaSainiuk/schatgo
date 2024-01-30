@@ -13,6 +13,7 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/db"
 	"github.com/MykolaSainiuk/schatgo/src/helper/jwthelper"
+	"github.com/MykolaSainiuk/schatgo/src/server/router"
 )
 
 type Server struct {
@@ -20,8 +21,8 @@ type Server struct {
 	db     types.IDatabase
 }
 
-func Setup() *Server {
-	router := SetupRouter()
+func Setup() types.IServer {
+	r := router.SetupRouter()
 
 	dbConn, err := db.ConnectDB(os.Getenv("MONGO_INITDB_DATABASE"))
 	if err != nil {
@@ -30,15 +31,14 @@ func Setup() *Server {
 	}
 
 	return &Server{
-		router: router,
+		router: r,
 		db:     dbConn,
 	}
 }
 
 func (srv *Server) Run() <-chan struct{} {
 	closingCh := make(chan struct{}, 1)
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
+	host, port := os.Getenv("HOST"), os.Getenv("PORT")
 
 	// rest
 	go func() {
@@ -69,8 +69,8 @@ func (srv *Server) GetDB() types.IDatabase {
 	return srv.db
 }
 
-// evn vars first
 func init() {
+	// evn vars load
 	envFilePath := getEnvFilePath()
 	if err := godotenv.Load(envFilePath); err != nil {
 		slog.Error(".env file not found")

@@ -2,20 +2,11 @@ basePath: /
 definitions:
   dto.AddContactInputDto:
     properties:
-      name:
+      username:
         minLength: 2
         type: string
     required:
-    - name
-    type: object
-  dto.GetMeOutputDto:
-    properties:
-      avatarUri:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
+    - username
     type: object
   dto.LoginInputDto:
     properties:
@@ -45,13 +36,21 @@ definitions:
         minLength: 6
         type: string
     required:
-    - avatarUri
     - name
     - password
     type: object
   dto.RegisterResponseDto:
     properties:
       id:
+        type: string
+    type: object
+  dto.UserInfoOutputDto:
+    properties:
+      avatarUri:
+        type: string
+      id:
+        type: string
+      name:
         type: string
     type: object
   httpexp.HttpExp:
@@ -125,6 +124,49 @@ paths:
       summary: Register user
       tags:
       - auth
+  /user/contact/add:
+    put:
+      consumes:
+      - application/json
+      description: Adding another user as a contact
+      parameters:
+      - description: New contact input
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddContactInputDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: Add contact to User
+      tags:
+      - contact
+  /user/contact/list:
+    get:
+      description: Unpaginated list of all contacts of User
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: List all contacts
+      tags:
+      - contact
   /user/me:
     get:
       description: ME endpoint
@@ -134,7 +176,7 @@ paths:
         "200":
           description: User object
           schema:
-            $ref: '#/definitions/dto.GetMeOutputDto'
+            $ref: '#/definitions/dto.UserInfoOutputDto'
         "404":
           description: Not found user
           schema:

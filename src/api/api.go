@@ -3,15 +3,15 @@ package api
 import (
 	"github.com/go-chi/chi/v5"
 
+	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/middleware"
-	"github.com/MykolaSainiuk/schatgo/src/server"
 
 	"github.com/MykolaSainiuk/schatgo/src/api/authapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/userapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/userapi/contactapi"
 )
 
-func apiRouter(srv *server.Server) chi.Router {
+func apiRouter(srv types.IServer) chi.Router {
 	r := chi.NewRouter()
 
 	AuthOnly := middleware.Authorized(srv.GetDB())
@@ -43,7 +43,7 @@ func apiRouter(srv *server.Server) chi.Router {
 	return r
 }
 
-func InitRoutes(srv *server.Server) {
+func InitRoutes(srv types.IServer) {
 	r := srv.GetRouter()
 
 	r.Mount("/api", apiRouter(srv))

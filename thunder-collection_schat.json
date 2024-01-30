@@ -1,20 +1,20 @@
 {
     "client": "Thunder Client",
     "collectionName": "schat",
-    "dateExported": "2024-01-27T09:07:48.034Z",
+    "dateExported": "2024-01-30T18:49:52.338Z",
     "version": "1.1",
     "folders": [],
     "requests": [
         {
-            "_id": "04891995-0334-46d9-92f1-448643e1eff6",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "b6cd5f31-31d7-4a9e-8f2a-0ae67c43965d",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "new chat message",
             "url": "http://localhost:{{port}}/api/message/{{chatId}}/new",
             "method": "PUT",
             "sortNum": 68.3,
-            "created": "2024-01-27T09:05:59.023Z",
-            "modified": "2024-01-27T09:07:15.074Z",
+            "created": "2024-01-29T10:26:43.360Z",
+            "modified": "2024-01-29T10:26:43.360Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -30,15 +30,15 @@
             "tests": []
         },
         {
-            "_id": "abfb8806-8149-4bfd-a7ac-7f366e4b4555",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "612094d8-9a1a-4bf3-86b8-281ac7806a2e",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "list chat messages",
             "url": "http://localhost:{{port}}/api/message/{{chatId}}/list",
             "method": "GET",
             "sortNum": 136.7,
-            "created": "2024-01-27T09:00:44.841Z",
-            "modified": "2024-01-27T09:00:44.841Z",
+            "created": "2024-01-29T10:26:43.359Z",
+            "modified": "2024-01-29T10:26:43.359Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -49,15 +49,15 @@
             "tests": []
         },
         {
-            "_id": "6c6e5c1b-eeb1-42a0-a771-69f26589dd3b",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "14f2820e-0f7a-4049-9fbd-098fff3eee0f",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "remove chat",
             "url": "http://localhost:{{port}}/api/chat/remove/653182019948064d6444855c",
             "method": "DELETE",
             "sortNum": 273.4,
-            "created": "2024-01-27T09:00:44.840Z",
-            "modified": "2024-01-27T09:00:44.840Z",
+            "created": "2024-01-29T10:26:43.358Z",
+            "modified": "2024-01-29T10:26:43.358Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -68,15 +68,15 @@
             "tests": []
         },
         {
-            "_id": "c718b887-e148-4cab-a448-17ffb7afb0ea",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "e7b04c83-43e0-4ce5-9ec4-ac8727f5e8e4",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "new chat",
             "url": "http://localhost:{{port}}/api/chat/new",
             "method": "PUT",
             "sortNum": 312.5,
-            "created": "2024-01-27T09:00:44.836Z",
-            "modified": "2024-01-27T09:04:12.534Z",
+            "created": "2024-01-29T10:26:43.354Z",
+            "modified": "2024-01-29T10:26:43.354Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -92,15 +92,15 @@
             "tests": []
         },
         {
-            "_id": "3662efc4-a343-4c3e-a421-30d875dc453d",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "107b93f6-2d80-4d08-9861-593387be498a",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "list my chats",
             "url": "http://localhost:{{port}}/api/chat/list",
             "method": "GET",
             "sortNum": 468.8,
-            "created": "2024-01-27T09:00:44.839Z",
-            "modified": "2024-01-27T09:00:44.839Z",
+            "created": "2024-01-29T10:26:43.357Z",
+            "modified": "2024-01-29T10:26:43.357Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -111,15 +111,15 @@
             "tests": []
         },
         {
-            "_id": "7dae0c0c-f4eb-4936-b45c-9cc38882a097",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "e11da331-847f-4154-a040-a2cbe4a0e4b6",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "add contact",
             "url": "http://localhost:{{port}}/api/user/contact/add",
             "method": "PUT",
             "sortNum": 625,
-            "created": "2024-01-27T09:00:44.835Z",
-            "modified": "2024-01-27T09:04:01.903Z",
+            "created": "2024-01-29T10:26:43.353Z",
+            "modified": "2024-01-29T10:26:43.353Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -135,15 +135,15 @@
             "tests": []
         },
         {
-            "_id": "46297230-9098-4f8c-83c5-320a8ea88bd8",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "cb9dcac0-0274-443d-b630-b6a8c2de296a",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
-            "name": "list my ALL contacts",
+            "name": "list my contacts",
             "url": "http://localhost:{{port}}/api/user/contact/list/all",
             "method": "GET",
             "sortNum": 937.5,
-            "created": "2024-01-27T09:00:44.837Z",
-            "modified": "2024-01-27T09:00:44.837Z",
+            "created": "2024-01-29T10:26:43.355Z",
+            "modified": "2024-01-29T10:26:43.355Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -154,15 +154,15 @@
             "tests": []
         },
         {
-            "_id": "a8bcffe3-664a-4dae-b53e-0c660d278c5a",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "4861508c-045b-4fe3-862c-5ca766ee4046",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "me",
             "url": "http://localhost:{{port}}/api/user/me",
             "method": "GET",
             "sortNum": 1250,
-            "created": "2024-01-27T09:00:44.834Z",
-            "modified": "2024-01-27T09:00:44.834Z",
+            "created": "2024-01-29T10:26:43.352Z",
+            "modified": "2024-01-29T10:26:43.352Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -173,15 +173,15 @@
             "tests": []
         },
         {
-            "_id": "f39997d6-9093-4676-b257-974a1c1c3c90",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "51e22abf-3d9a-4d96-b447-42b4dd2da574",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "login",
             "url": "http://localhost:{{port}}/api/user/login",
             "method": "POST",
             "sortNum": 2500,
-            "created": "2024-01-27T09:00:44.833Z",
-            "modified": "2024-01-27T09:02:45.380Z",
+            "created": "2024-01-29T10:26:43.351Z",
+            "modified": "2024-01-29T10:26:43.351Z",
             "headers": [],
             "params": [],
             "body": {
@@ -192,15 +192,15 @@
             "tests": []
         },
         {
-            "_id": "83c1ba65-47c8-44ce-8672-0cd7376c3ae4",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "e6a3ab27-50ab-4114-ae68-ab5db63f32fa",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "register",
             "url": "http://localhost:{{port}}/api/user/register",
             "method": "POST",
             "sortNum": 10000,
-            "created": "2024-01-27T09:00:44.832Z",
-            "modified": "2024-01-27T09:00:44.832Z",
+            "created": "2024-01-29T10:26:43.350Z",
+            "modified": "2024-01-29T10:26:43.350Z",
             "headers": [],
             "params": [],
             "body": {
@@ -211,15 +211,15 @@
             "tests": []
         },
         {
-            "_id": "a677dc35-736d-4b48-93d8-1928dc5c4161",
-            "colId": "fa85c9bf-dcd4-4177-8daf-a7c67aeed816",
+            "_id": "dbca8310-44bf-497c-b749-80c18f95ac22",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "register [test]",
             "url": "http://localhost:{{port}}/api/user/register",
             "method": "POST",
             "sortNum": 20000,
-            "created": "2024-01-27T09:00:44.838Z",
-            "modified": "2024-01-27T09:00:44.838Z",
+            "created": "2024-01-29T10:26:43.356Z",
+            "modified": "2024-01-29T10:26:43.356Z",
             "headers": [],
             "params": [],
             "body": {

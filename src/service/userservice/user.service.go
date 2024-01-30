@@ -3,16 +3,16 @@ package userservice
 import (
 	"context"
 
+	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
 	"github.com/MykolaSainiuk/schatgo/src/repo/userrepo"
-	"github.com/MykolaSainiuk/schatgo/src/server"
 )
 
 type UserService struct {
 	userRepo *userrepo.UserRepo
 }
 
-func NewUserService(srv *server.Server) *UserService {
+func NewUserService(srv types.IServer) *UserService {
 	return &UserService{
 		userRepo: userrepo.NewUserRepo(srv.GetDB()),
 	}

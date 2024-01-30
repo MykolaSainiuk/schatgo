@@ -1,4 +1,4 @@
-package server
+package router
 
 import (
 	"log/slog"
@@ -13,6 +13,7 @@ import (
 	"github.com/unrolled/secure"
 
 	customMiddleware "github.com/MykolaSainiuk/schatgo/src/middleware"
+	"github.com/MykolaSainiuk/schatgo/src/server/logger"
 )
 
 func SetupRouter() chi.Router {
@@ -30,8 +31,8 @@ func SetupRouter() chi.Router {
 	r.Use(middleware.RequestID)
 	// r.Use(middleware.RealIP)
 
-	logger := SetupLogger(os.Getenv("NODE_ENV"))
-	r.Use(httplog.RequestLogger(logger, LogPathsToSkip))
+	customerLogger := logger.SetupLogger(os.Getenv("NODE_ENV"))
+	r.Use(httplog.RequestLogger(customerLogger, logger.LogPathsToSkip))
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))

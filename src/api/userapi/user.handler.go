@@ -9,7 +9,6 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/httpexp"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
-	"github.com/MykolaSainiuk/schatgo/src/server"
 	"github.com/MykolaSainiuk/schatgo/src/service/userservice"
 )
 
@@ -17,7 +16,7 @@ type UserHandler struct {
 	UserService *userservice.UserService
 }
 
-func NewUserHandler(srv *server.Server) *UserHandler {
+func NewUserHandler(srv types.IServer) *UserHandler {
 	userService := userservice.NewUserService(srv)
 	return &UserHandler{userService}
 }

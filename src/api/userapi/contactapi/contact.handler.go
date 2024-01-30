@@ -12,7 +12,6 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/httpexp"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
-	"github.com/MykolaSainiuk/schatgo/src/server"
 	"github.com/MykolaSainiuk/schatgo/src/service/userservice"
 )
 
@@ -20,7 +19,7 @@ type ContactHandler struct {
 	UserService *userservice.UserService
 }
 
-func NewContactHandler(srv *server.Server) *ContactHandler {
+func NewContactHandler(srv types.IServer) *ContactHandler {
 	userService := userservice.NewUserService(srv)
 	return &ContactHandler{userService}
 }

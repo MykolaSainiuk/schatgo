@@ -7,18 +7,18 @@ import (
 
 	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
+	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/helper/jwthelper"
 	"github.com/MykolaSainiuk/schatgo/src/helper/pwdhelper"
 	"github.com/MykolaSainiuk/schatgo/src/model"
 	"github.com/MykolaSainiuk/schatgo/src/repo/userrepo"
-	"github.com/MykolaSainiuk/schatgo/src/server"
 )
 
 type AuthService struct {
 	userRepo *userrepo.UserRepo
 }
 
-func NewAuthService(srv *server.Server) *AuthService {
+func NewAuthService(srv types.IServer) *AuthService {
 	return &AuthService{
 		userRepo: userrepo.NewUserRepo(srv.GetDB()),
 	}
@@ -35,7 +35,7 @@ func (service *AuthService) RegisterNewUser(ctx context.Context, dto *dto.Regist
 		Name:      dto.Name,
 		AvatarUri: dto.AvatarUri,
 
-		Hash: hash,
+		Hash:     hash,
 		Contacts: make([]model.User, 0),
 
 		CreatedAt: time.Now(),

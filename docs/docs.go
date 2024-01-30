@@ -98,6 +98,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/contact/add": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adding another user as a contact",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contact"
+                ],
+                "summary": "Add contact to User",
+                "parameters": [
+                    {
+                        "description": "New contact input",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddContactInputDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/contact/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Unpaginated list of all contacts of User",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contact"
+                ],
+                "summary": "List all contacts",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
         "/user/me": {
             "get": {
                 "security": [
@@ -117,7 +187,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User object",
                         "schema": {
-                            "$ref": "#/definitions/dto.GetMeOutputDto"
+                            "$ref": "#/definitions/dto.UserInfoOutputDto"
                         }
                     },
                     "404": {
@@ -134,26 +204,12 @@ const docTemplate = `{
         "dto.AddContactInputDto": {
             "type": "object",
             "required": [
-                "name"
+                "username"
             ],
             "properties": {
-                "name": {
+                "username": {
                     "type": "string",
                     "minLength": 2
-                }
-            }
-        },
-        "dto.GetMeOutputDto": {
-            "type": "object",
-            "properties": {
-                "avatarUri": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
                 }
             }
         },
@@ -185,7 +241,6 @@ const docTemplate = `{
         "dto.RegisterInputDto": {
             "type": "object",
             "required": [
-                "avatarUri",
                 "name",
                 "password"
             ],
@@ -207,6 +262,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserInfoOutputDto": {
+            "type": "object",
+            "properties": {
+                "avatarUri": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

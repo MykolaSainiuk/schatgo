@@ -11,7 +11,7 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/httpexp"
-	"github.com/MykolaSainiuk/schatgo/src/server"
+	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/service/authservice"
 )
 
@@ -19,7 +19,7 @@ type AuthHandler struct {
 	authService *authservice.AuthService
 }
 
-func NewAuthHandler(srv *server.Server) *AuthHandler {
+func NewAuthHandler(srv types.IServer) *AuthHandler {
 	authService := authservice.NewAuthService(srv)
 	return &AuthHandler{authService}
 }
