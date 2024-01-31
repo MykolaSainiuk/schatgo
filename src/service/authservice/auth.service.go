@@ -2,6 +2,7 @@ package authservice
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"time"
 
@@ -28,7 +29,7 @@ func (service *AuthService) RegisterNewUser(ctx context.Context, dto *dto.Regist
 	hash, err := pwdhelper.HashPassword(dto.Password)
 	if err != nil {
 		slog.Error("failed to generate hash", slog.Any("error", err))
-		return "", cmnerr.ErrHashGeneration
+		return "", errors.Join(cmnerr.ErrHashGeneration, err)
 	}
 
 	newUser := &model.User{
@@ -64,7 +65,7 @@ func (service *AuthService) LoginUser(ctx context.Context, name string, rawPassw
 	accessToken, err := jwthelper.GenerateToken(user.ID.Hex(), user.Name)
 	if err != nil {
 		slog.Error("failed to generate token", slog.Any("error", err))
-		return "", cmnerr.ErrGenerateAccessToken
+		return "", errors.Join(cmnerr.ErrGenerateAccessToken, err)
 	}
 
 	return accessToken, nil

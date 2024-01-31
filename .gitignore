@@ -27,3 +27,6 @@ logs
 *.env
 
 ./readme
+
+# Go debug bin
+__debug*

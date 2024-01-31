@@ -112,4 +112,4 @@ func getAuthTokenExpr() int {
 	return n
 }
 
-const DefaultAccessTokenLifetimeHrsInSeconds int = 2 * 60 * 60
+const DefaultAccessTokenLifetimeHrsInSeconds int = 4 * 60 * 60

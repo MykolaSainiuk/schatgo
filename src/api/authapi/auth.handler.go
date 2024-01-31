@@ -39,14 +39,14 @@ func (handler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request)
 	var body dto.RegisterInputDto
 	data, _ := io.ReadAll(r.Body)
 	if err := json.Unmarshal(data, &body); err != nil {
-		httpexp.FromError(err, http.StatusUnprocessableEntity).SetMessage(MsgInvalidRegisterInput).Reply(w)
+		httpexp.From(err, MsgInvalidRegisterInput, http.StatusUnprocessableEntity).Reply(w)
 		return
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(&body); err != nil {
 		validationErrs := cmnerr.GetValidationErrors(err)
-		httpexp.FromError(err, http.StatusUnprocessableEntity, validationErrs...).SetMessage(MsgInvalidRegisterInput).Reply(w)
+		httpexp.From(err, MsgInvalidRegisterInput, http.StatusUnprocessableEntity, validationErrs...).Reply(w)
 		return
 	}
 
@@ -54,12 +54,12 @@ func (handler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request)
 	userId, err := handler.authService.RegisterNewUser(ctx, &body)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrUniqueViolation) {
-			httpexp.FromError(err, http.StatusUnprocessableEntity).SetMessage("such name is already occupied").Reply(w)
+			httpexp.From(err, "such name is already occupied", http.StatusUnprocessableEntity).Reply(w)
 			return
 		}
 		// if errors.Is(err, cmnerr.ErrHashGeneration) {
 		// }
-		cmnerr.LogAndReply500(w, err)
+		cmnerr.Reply500(w, err)
 		return
 	}
 
@@ -83,14 +83,14 @@ func (handler *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var body dto.LoginInputDto
 	data, _ := io.ReadAll(r.Body)
 	if err := json.Unmarshal(data, &body); err != nil {
-		httpexp.FromError(err, http.StatusUnauthorized).SetMessage(MsgFailedToLogin).Reply(w)
+		httpexp.From(err, MsgFailedToLogin, http.StatusUnauthorized).Reply(w)
 		return
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(body); err != nil {
 		validationErrs := cmnerr.GetValidationErrors(err)
-		httpexp.FromError(err, http.StatusUnauthorized, validationErrs...).SetMessage(MsgFailedToLogin).Reply(w)
+		httpexp.From(err, MsgFailedToLogin, http.StatusUnauthorized, validationErrs...).Reply(w)
 		return
 	}
 	// FromError(err, http.StatusUnauthorized).SetNewMessage(failedToLoginMsg) - bcz always oblivious about reasons
@@ -99,10 +99,10 @@ func (handler *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	accessToken, err := handler.authService.LoginUser(ctx, body.Name, body.Password)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) || errors.Is(err, cmnerr.ErrHashMismatch) || errors.Is(err, cmnerr.ErrGenerateAccessToken) {
-			httpexp.FromError(err, http.StatusUnauthorized).SetMessage(MsgFailedToLogin).Reply(w)
+			httpexp.From(err, MsgFailedToLogin, http.StatusUnauthorized).Reply(w)
 			return
 		}
-		cmnerr.LogAndReply500(w, err)
+		cmnerr.Reply500(w, err)
 		return
 	}
 

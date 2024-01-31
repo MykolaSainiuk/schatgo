@@ -5,11 +5,32 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "name": "nodemon",
+            "program": "go run ${workspaceFolder}/main.go",
+            "runtimeExecutable": "nodemon",
+            "type": "node",
+            "args": [
+                "--signal",
+                "SIGTERM"
+            ],
+            "request": "launch",
+            "restart": true,
+            "envFile": "${workspaceFolder}/.env",
+            "runtimeArgs": [
+                "--exec",
+            ]
+        },
+        {
             "name": "go run main.go",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "main.go"
-        }
+            "program": "main.go",
+            "envFile": "${workspaceFolder}/.env"
+        },
     ]
+    // "type": "go",
+    // nodemon --exec go run main.go --signal SIGTERM
 }

@@ -54,7 +54,7 @@ definitions:
         type: string
     type: object
   httpexp.HttpExp:
-    description: common 422 respons
+    description: common 422 response
     properties:
       details:
         items:

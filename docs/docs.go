@@ -281,7 +281,7 @@ const docTemplate = `{
             }
         },
         "httpexp.HttpExp": {
-            "description": "common 422 respons",
+            "description": "common 422 response",
             "type": "object",
             "properties": {
                 "details": {

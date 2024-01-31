@@ -2,70 +2,52 @@ package httpexp
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
-	"strings"
 )
 
 // InvalidResponseDto
 //
-//	@Description	common 422 respons
+//	@Description	common 422 response
 type HttpExp struct {
 	Error      error `json:"-"`
 	StatusCode int   `json:"-"`
 
-	Message string   `json:"message,omitempty"`
-	Details []string `json:"details"`
+	PublicMessage string   `json:"message"`
+	Details       []string `json:"details,omitempty"`
 }
 
-func FromError(err error, code int, details ...string) *HttpExp {
+func From(err error, msg string, code int, details ...string) *HttpExp {
 	return &HttpExp{
-		Error:      err,
-		StatusCode: code,
-		Message:    err.Error(),
-		Details:    details,
+		Error:         err,
+		StatusCode:    code,
+		PublicMessage: msg,
+		Details:       details,
 	}
 }
 
-func FromText(message string, code int, details ...string) *HttpExp {
-	return &HttpExp{
-		Error:      nil,
-		StatusCode: code,
-		Message:    message,
-		Details:    details,
-	}
-}
-
-func (e *HttpExp) SetMessage(message string) *HttpExp {
-	e.Message = message
+func (e *HttpExp) SetMessage(msg string) *HttpExp {
+	e.PublicMessage = msg
 	return e
 }
 
 func (e *HttpExp) Reply(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(e.StatusCode)
 	res, err := json.Marshal(e)
 	if err != nil {
 		slog.Error("failed to marshal http exception", slog.Any("error", err))
 		return
 	}
-	if e.Details != nil {
-		slog.Debug(e.Message,
-			slog.Int("status", int(e.StatusCode)),
-			slog.Any("error", e.Error),
-			slog.String("msg", strings.Join(e.Details, "; ")),
-		)
-	} else {
-		slog.Debug(e.Message,
-			slog.Int("status", int(e.StatusCode)),
-			slog.Any("error", e.Error),
-		)
-	}
 
+	logStr := ""
+	if e.Details != nil {
+		logStr = fmt.Sprintf("Msg: %s; Status: %d; Error:\n%+v\nDetails:%v", e.PublicMessage, e.StatusCode, e.Error, e.Details)
+	} else {
+		logStr = fmt.Sprintf("Msg: %s; Status: %d; Error:\n%+v", e.PublicMessage, e.StatusCode, e.Error)
+	}
+	slog.Debug(logStr)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(e.StatusCode)
 	w.Write(res)
 }
-
-// some common http exceptions
-var (
-	UserNotFoundExp = FromText("user not found", http.StatusNotFound)
-)

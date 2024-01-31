@@ -40,14 +40,14 @@ func (handler *ContactHandler) AddContact(w http.ResponseWriter, r *http.Request
 	var body dto.AddContactInputDto
 	data, _ := io.ReadAll(r.Body)
 	if err := json.Unmarshal(data, &body); err != nil {
-		httpexp.FromError(err, http.StatusUnprocessableEntity).SetMessage(MsgInvalidNewContactInput).Reply(w)
+		httpexp.From(err, MsgInvalidNewContactInput, http.StatusUnprocessableEntity).Reply(w)
 		return
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	if err := validate.Struct(&body); err != nil {
 		validationErrs := cmnerr.GetValidationErrors(err)
-		httpexp.FromError(err, http.StatusUnprocessableEntity, validationErrs...).SetMessage(MsgInvalidNewContactInput).Reply(w)
+		httpexp.From(err, MsgInvalidNewContactInput, http.StatusUnprocessableEntity, validationErrs...).Reply(w)
 		return
 	}
 
@@ -57,14 +57,14 @@ func (handler *ContactHandler) AddContact(w http.ResponseWriter, r *http.Request
 	err := handler.UserService.AddContact(ctx, userID, body.UserName)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
-			httpexp.UserNotFoundExp.Reply(w)
+			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)
 			return
 		}
-		cmnerr.LogAndReply500(w, err)
+		cmnerr.Reply500(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	w.Write(nil)
 }
 
@@ -85,10 +85,10 @@ func (handler *ContactHandler) ListAllContacts(w http.ResponseWriter, r *http.Re
 	contacts, err := handler.UserService.GetAllContacts(ctx, userID)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
-			httpexp.UserNotFoundExp.Reply(w)
+			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)
 			return
 		}
-		cmnerr.LogAndReply500(w, err)
+		cmnerr.Reply500(w, err)
 		return
 	}
 

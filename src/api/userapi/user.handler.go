@@ -38,10 +38,10 @@ func (handler *UserHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) 
 	user, err := handler.UserService.GetUser(ctx, userID)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
-			httpexp.UserNotFoundExp.Reply(w)
+			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)
 			return
 		}
-		cmnerr.LogAndReply500(w, err)
+		cmnerr.Reply500(w, err)
 		return
 	}
 

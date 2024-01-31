@@ -24,10 +24,7 @@ func SetupRouter() chi.Router {
 	// init router
 	r := chi.NewRouter()
 
-	isProd := os.Getenv("NODE_ENV") == "production"
-	r.Use(secure.New(secure.Options{
-		SSLRedirect: isProd,
-	}).Handler)
+	r.Use(secure.New().Handler)
 	r.Use(middleware.RequestID)
 	// r.Use(middleware.RealIP)
 
