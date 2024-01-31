@@ -21,3 +21,8 @@ type IDatabase interface {
 	GetCollection(string) *mongo.Collection
 	Shutdown()
 }
+
+type PaginationParams struct {
+	Page  int
+	Limit int
+}

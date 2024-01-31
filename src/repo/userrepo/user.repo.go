@@ -156,7 +156,7 @@ func (repo *UserRepo) DeleteUser(ctx context.Context, id string) error {
 	return err
 }
 
-func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string) ([]model.User, error) {
+func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string, params ...any) ([]model.User, error) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
 	match := bson.D{{Key: "$match", Value: bson.D{{Key: "_id", Value: _id}}}}
@@ -170,8 +170,20 @@ func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string) ([]mod
 	unwind := bson.D{{Key: "$unwind", Value: "$contacts1"}}
 	replaceRoot := bson.D{{Key: "$replaceRoot", Value: bson.D{{Key: "newRoot", Value: "$contacts1"}}}}
 
+	pipelineStages := mongo.Pipeline{match, lookup, unwind, replaceRoot}
+
+	pgParam := params[0].(types.PaginationParams)
+	if pgParam.Limit != 0 {
+		limit := bson.D{{Key: "$limit", Value: pgParam.Limit}}
+		pipelineStages = append(pipelineStages, limit)
+	}
+	if pgParam.Page != 0 {
+		skip := bson.D{{Key: "$skip", Value: (pgParam.Page - 1) * pgParam.Limit}}
+		pipelineStages = append(pipelineStages, skip)
+	}
+
 	var contacts []model.User
-	cursor, err := repo.collection.Aggregate(ctx, mongo.Pipeline{match, lookup, unwind, replaceRoot})
+	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
 		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
 		return nil, err

@@ -29,3 +29,7 @@ func (service *UserService) AddContact(ctx context.Context, userID string, conta
 func (service *UserService) GetAllContacts(ctx context.Context, userID string) ([]model.User, error) {
 	return service.userRepo.GetUserContactsByID(ctx, userID)
 }
+
+func (service *UserService) GetContactsPaginated(ctx context.Context, userID string, pgParams types.PaginationParams) ([]model.User, error) {
+	return service.userRepo.GetUserContactsByID(ctx, userID, pgParams)
+}

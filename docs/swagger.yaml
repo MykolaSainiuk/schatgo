@@ -153,6 +153,15 @@ paths:
   /user/contact/list:
     get:
       description: Unpaginated list of all contacts of User
+      parameters:
+      - description: page size
+        in: path
+        name: size
+        type: string
+      - description: page number
+        in: path
+        name: page
+        type: string
       produces:
       - application/json
       responses:
@@ -164,7 +173,7 @@ paths:
             $ref: '#/definitions/httpexp.HttpExp'
       security:
       - BearerAuth: []
-      summary: List all contacts
+      summary: List contacts paginated
       tags:
       - contact
   /user/me:

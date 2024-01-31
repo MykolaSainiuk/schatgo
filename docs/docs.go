@@ -154,7 +154,21 @@ const docTemplate = `{
                 "tags": [
                     "contact"
                 ],
-                "summary": "List all contacts",
+                "summary": "List contacts paginated",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "page size",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "page number",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"

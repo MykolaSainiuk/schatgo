@@ -37,6 +37,7 @@ func apiRouter(srv types.IServer) chi.Router {
 		r.Route("/user/contact", func(r chi.Router) {
 			r.Put("/add", contactHandler.AddContact)
 			r.Get("/list/all", contactHandler.ListAllContacts)
+			r.Get("/list", contactHandler.ListContactsPaginated)
 		})
 	})
 
