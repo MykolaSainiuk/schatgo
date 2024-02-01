@@ -37,7 +37,7 @@ func NewContactHandler(srv types.IServer) *ContactHandler {
 //	@Param			body	body		dto.AddContactInputDto	true	"New contact input"
 //	@Success		200
 //	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
-//	@Router			/user/contact/add [put]
+//	@Router			/api/user/contact/add [put]
 func (handler *ContactHandler) AddContact(w http.ResponseWriter, r *http.Request) {
 	var body dto.AddContactInputDto
 	data, _ := io.ReadAll(r.Body)
@@ -77,9 +77,9 @@ func (handler *ContactHandler) AddContact(w http.ResponseWriter, r *http.Request
 //	@Tags			contact
 //	@Security		BearerAuth
 //	@Produce		json
-//	@Success		200
+//	@Success		200		{array}		dto.UserInfoOutputDto
 //	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
-//	@Router			/user/contact/list [get]
+//	@Router			/api/user/contact/list/all [get]
 func (handler *ContactHandler) ListAllContacts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
@@ -92,15 +92,15 @@ func (handler *ContactHandler) ListAllContacts(w http.ResponseWriter, r *http.Re
 // ListContactsPaginated method
 //
 //	@Summary		List contacts paginated
-//	@Description	Unpaginated list of all contacts of User
+//	@Description	Paginated list of User contacts
 //	@Tags			contact
 //	@Security		BearerAuth
 //	@Param			page	path	string					false	"page number"
 //	@Param			limit	path	string					false	"page size"
 //	@Produce		json
-//	@Success		200
+//	@Success		200		{array}		dto.UserInfoOutputDto
 //	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
-//	@Router			/user/contact/list [get]
+//	@Router			/api/user/contact/list [get]
 func (handler *ContactHandler) ListContactsPaginated(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
@@ -138,6 +138,10 @@ func renderContacts(w http.ResponseWriter, contacts []model.User, err error) {
 			ID:        contacts[i].ID.Hex(),
 			Name:      contacts[i].Name,
 			AvatarUri: contacts[i].AvatarUri,
+			Contacts: contacts[i].Contacts,
+			Chats: contacts[i].Chats,
+			CreatedAt: contacts[i].CreatedAt.String(),
+			UpdatedAt: contacts[i].UpdatedAt.String(),
 		}
 	}
 

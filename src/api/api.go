@@ -7,6 +7,7 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/middleware"
 
 	"github.com/MykolaSainiuk/schatgo/src/api/authapi"
+	"github.com/MykolaSainiuk/schatgo/src/api/chatapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/userapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/userapi/contactapi"
 )
@@ -38,6 +39,16 @@ func apiRouter(srv types.IServer) chi.Router {
 			r.Put("/add", contactHandler.AddContact)
 			r.Get("/list/all", contactHandler.ListAllContacts)
 			r.Get("/list", contactHandler.ListContactsPaginated)
+		})
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(AuthOnly)
+		chatHandler := chatapi.NewChatHandler(srv)
+		r.Route("/chat", func(r chi.Router) {
+			r.Put("/new", chatHandler.NewChat)
+			r.Get("/list/all", chatHandler.ListAllChats)
+			r.Get("/list", chatHandler.ListChatsPaginated)
 		})
 	})
 

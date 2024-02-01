@@ -61,8 +61,144 @@ func (repo *UserRepo) GetUserByID(ctx context.Context, id string) (*model.User, 
 	return user, err
 }
 
+func (repo *UserRepo) GetUserByIdPopulated(ctx context.Context, id string) (*model.UserPopulated, error) {
+	_id, _ := primitive.ObjectIDFromHex(id)
+
+	match := bson.D{{Key: "$match", Value: bson.D{{Key: "_id", Value: _id}}}}
+
+	ls1 := bson.D{
+		{Key: "from", Value: "users"},
+		{Key: "localField", Value: "contacts"},
+		{Key: "foreignField", Value: "_id"},
+		{Key: "as", Value: "contacts"},
+	}
+	lookup1 := bson.D{{Key: "$lookup", Value: ls1}}
+
+	ls2 := bson.D{
+		{Key: "from", Value: "chats"},
+		{Key: "localField", Value: "chats"},
+		{Key: "foreignField", Value: "_id"},
+		{Key: "as", Value: "chats"},
+	}
+	lookup2 := bson.D{{Key: "$lookup", Value: ls2}}
+
+	pipelineStages := mongo.Pipeline{match, lookup1, lookup2}
+
+	var users []any
+	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
+	if err != nil {
+		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	if err = cursor.All(ctx, &users); err != nil {
+		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, cmnerr.ErrNotFoundEntity
+	}
+
+	d, ok := users[0].(primitive.D)
+	if !ok {
+		return nil, errors.New("cannot cast user to UserPopulated")
+	}
+	user := d.Map()
+
+	contacts := []model.User{}
+	rawContacts, ok := user["contacts"].(primitive.A)
+	if ok && len(rawContacts) > 0 {
+		for _, v := range rawContacts {
+			contacts = append(contacts, rawDocToUserModel(v.(primitive.D).Map()))
+		}
+	}
+	chats := []model.Chat{}
+	rawChats, ok := user["chats"].(primitive.A)
+	if ok && len(rawChats) > 0 {
+		for _, v := range rawChats {
+			chats = append(chats, rawDocToChatModel(v.(primitive.D).Map()))
+		}
+	}
+
+	return &model.UserPopulated{
+		User:     rawDocToUserModel(user),
+		Contacts: contacts,
+		Chats:    chats,
+	}, nil
+}
+
+func rawDocToUserModel(rawDoc map[string]any) model.User {
+	rcontacts, _ := rawDoc["contacts"].(primitive.A)
+	rchats, _ := rawDoc["chats"].(primitive.A)
+
+	contacts, chats := shrinkObjectsToItsIDs(rcontacts), shrinkObjectsToItsIDs(rchats)
+
+	return model.User{
+		ID:        rawDoc["_id"].(primitive.ObjectID),
+		Name:      rawDoc["name"].(string),
+		AvatarUri: rawDoc["avatarUri"].(string),
+		Hash:      rawDoc["hash"].(string),
+
+		Contacts: contacts,
+		Chats:    chats,
+
+		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
+	}
+}
+
+func shrinkObjectsToItsIDs(objects primitive.A) []primitive.ObjectID {
+	_ids := []primitive.ObjectID{}
+	for _, v := range objects {
+		_id, ok := v.(primitive.ObjectID)
+		if !ok {
+			_id, ok = v.(primitive.D).Map()["_id"].(primitive.ObjectID)
+		}
+		if ok {
+			_ids = append(_ids, _id)
+		}
+	}
+	return _ids
+}
+
+func rawDocToChatModel(rawDoc map[string]any) model.Chat {
+	users := []primitive.ObjectID{}
+	rco, ok := rawDoc["users"].(primitive.A)
+	if ok {
+		for _, v := range rco {
+			users = append(users, v.(primitive.ObjectID))
+		}
+	}
+	name, ok := rawDoc["name"].(string)
+	if !ok {
+		name = ""
+	}
+	iconUri, ok := rawDoc["iconUri"].(string)
+	if !ok {
+		iconUri = ""
+	}
+	lastMessage, ok := rawDoc["lastMessage"].(primitive.ObjectID)
+	if !ok {
+		lastMessage = primitive.NilObjectID
+	}
+
+	return model.Chat{
+		ID:      rawDoc["_id"].(primitive.ObjectID),
+		Name:    name,
+		Muted:   rawDoc["muted"].(bool),
+		IconUri: iconUri,
+
+		Users:       users,
+		LastMessage: lastMessage,
+
+		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
+	}
+}
+
 func (repo *UserRepo) GetUsers(ctx context.Context, page int, limit int) (*[]model.User, error) {
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}}).SetLimit(int64(limit)).SetSkip(int64(page * limit))
+	opts := options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}}).SetLimit(int64(limit)).SetSkip(int64(page * limit))
 
 	cursor, err := repo.collection.Find(ctx, bson.D{}, opts)
 	if err != nil || cursor == nil {
@@ -84,6 +220,7 @@ func (repo *UserRepo) GetUsers(ctx context.Context, page int, limit int) (*[]mod
 func (repo *UserRepo) GetUserByName(ctx context.Context, name string) (*model.User, error) {
 	records := repo.collection.FindOne(ctx, bson.D{{Key: "name", Value: name}}, options.FindOne().SetProjection(bson.D{
 		{Key: "contacts", Value: 0},
+		{Key: "chats", Value: 0},
 	}))
 	// TODO: defect if not omit "contacts" field
 
@@ -196,4 +333,19 @@ func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string, params
 	}
 
 	return contacts, err
+}
+
+func (repo *UserRepo) AddChatIdToUsers(ctx context.Context, chatId primitive.ObjectID, id1 string, id2 string) error {
+	_id1, _ := primitive.ObjectIDFromHex(id1)
+	r, err := repo.collection.UpdateByID(ctx, _id1, bson.M{"$addToSet": bson.M{"chats": chatId}})
+
+	err = handleUpdateError(err, r.MatchedCount, id1)
+	if err != nil {
+		return err
+	}
+
+	_id2, _ := primitive.ObjectIDFromHex(id2)
+	r, err = repo.collection.UpdateByID(ctx, _id2, bson.M{"$addToSet": bson.M{"chats": chatId}})
+
+	return handleUpdateError(err, r.MatchedCount, id2)
 }

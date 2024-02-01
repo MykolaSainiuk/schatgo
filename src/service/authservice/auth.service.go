@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
@@ -36,8 +38,10 @@ func (service *AuthService) RegisterNewUser(ctx context.Context, dto *dto.Regist
 		Name:      dto.Name,
 		AvatarUri: dto.AvatarUri,
 
-		Hash:     hash,
-		Contacts: make([]model.User, 0),
+		Hash: hash,
+
+		Contacts: make([]primitive.ObjectID, 0),
+		Chats:    make([]primitive.ObjectID, 0),
 
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),

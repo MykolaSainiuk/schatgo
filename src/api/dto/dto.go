@@ -1,5 +1,7 @@
 package dto
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 // -- RegisterUser
 // RegisterInputDto
 type RegisterInputDto struct {
@@ -28,11 +30,49 @@ type LoginOutputDto struct {
 
 // UserInfoOutputDto
 type UserInfoOutputDto struct {
-	ID        string `json:"id"`
+	ID        string `json:"_id"`
 	Name      string `json:"name"`
 	AvatarUri string `json:"avatarUri"`
+
+	Contacts []primitive.ObjectID `json:"contacts"`
+	Chats    []primitive.ObjectID `json:"chats"`
+
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
+// UserInfoExtendedOutputDto
+type UserInfoExtendedOutputDto struct {
+	ID        string `json:"_id"`
+	Name      string `json:"name"`
+	AvatarUri string `json:"avatarUri"`
+
+	Contacts []UserInfoExtendedOutputDto `json:"contacts"`
+	Chats    []ChatOutputDto             `json:"chats"`
+
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+// AddContactInputDto
 type AddContactInputDto struct {
 	UserName string `json:"username" validate:"required,min=2"`
+}
+
+// AddChatInputDto
+type AddChatInputDto struct {
+	UserName string `json:"username" validate:"required,min=2"`
+	ChatName string `json:"chatName"`
+}
+
+// ChatOutputDto
+type ChatOutputDto struct {
+	ID          string               `json:"_id"`
+	Name        string               `json:"name"`
+	IconUri     string               `json:"iconUri"`
+	Muted       bool                 `json:"muted"`
+	Users       []primitive.ObjectID `json:"users"`
+	LastMessage primitive.ObjectID   `json:"lastMessage"`
+	CreatedAt   string               `json:"createdAt"`
+	UpdatedAt   string               `json:"updatedAt"`
 }

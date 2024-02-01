@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/httpexp"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
@@ -28,9 +27,9 @@ func NewUserHandler(srv types.IServer) *UserHandler {
 //	@Tags			user
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Success		200		{object}	dto.UserInfoOutputDto	"User object"
+//	@Success		200		{object}	dto.UserInfoExtendedOutputDto	"User object extended"
 //	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
-//	@Router			/user/me [get]
+//	@Router			/api/user/me [get]
 func (handler *UserHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
@@ -46,9 +45,6 @@ func (handler *UserHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(dto.UserInfoOutputDto{
-		ID:        user.ID.Hex(),
-		Name:      user.Name,
-		AvatarUri: user.AvatarUri})
+	res, _ := json.Marshal(user)
 	w.Write(res)
 }

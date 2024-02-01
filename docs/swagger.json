@@ -12,6 +12,285 @@
     "host": "localhost:5000",
     "basePath": "/",
     "paths": {
+        "/api/chat/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Paginated list of User chats",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "List chats paginated",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "page number",
+                        "name": "page",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ChatOutputDto"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/chat/list/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Unpaginated list of all user chats",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "List all chats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ChatOutputDto"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/chat/new": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Establish new chat for two users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Create new chat",
+                "parameters": [
+                    {
+                        "description": "New chat input",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddChatInputDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/contact/add": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adding another user as a contact",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contact"
+                ],
+                "summary": "Add contact to User",
+                "parameters": [
+                    {
+                        "description": "New contact input",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddContactInputDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/contact/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Paginated list of User contacts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contact"
+                ],
+                "summary": "List contacts paginated",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "page number",
+                        "name": "page",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserInfoOutputDto"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/contact/list/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Unpaginated list of all contacts of User",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contact"
+                ],
+                "summary": "List all contacts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserInfoOutputDto"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ME endpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user info",
+                "responses": {
+                    "200": {
+                        "description": "User object extended",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfoExtendedOutputDto"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Make access token for user",
@@ -91,124 +370,25 @@
                     }
                 }
             }
-        },
-        "/user/contact/add": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Adding another user as a contact",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "contact"
-                ],
-                "summary": "Add contact to User",
-                "parameters": [
-                    {
-                        "description": "New contact input",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddContactInputDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "404": {
-                        "description": "Not found user",
-                        "schema": {
-                            "$ref": "#/definitions/httpexp.HttpExp"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/contact/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Unpaginated list of all contacts of User",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "contact"
-                ],
-                "summary": "List contacts paginated",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "page size",
-                        "name": "size",
-                        "in": "path"
-                    },
-                    {
-                        "type": "string",
-                        "description": "page number",
-                        "name": "page",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "404": {
-                        "description": "Not found user",
-                        "schema": {
-                            "$ref": "#/definitions/httpexp.HttpExp"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/me": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "ME endpoint",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get user info",
-                "responses": {
-                    "200": {
-                        "description": "User object",
-                        "schema": {
-                            "$ref": "#/definitions/dto.UserInfoOutputDto"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found user",
-                        "schema": {
-                            "$ref": "#/definitions/httpexp.HttpExp"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
+        "dto.AddChatInputDto": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "chatName": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "username": {
+                    "type": "string",
+                    "minLength": 2
+                }
+            }
+        },
         "dto.AddContactInputDto": {
             "type": "object",
             "required": [
@@ -218,6 +398,38 @@
                 "username": {
                     "type": "string",
                     "minLength": 2
+                }
+            }
+        },
+        "dto.ChatOutputDto": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "iconUri": {
+                    "type": "string"
+                },
+                "lastMessage": {
+                    "type": "string"
+                },
+                "muted": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -274,16 +486,66 @@
                 }
             }
         },
-        "dto.UserInfoOutputDto": {
+        "dto.UserInfoExtendedOutputDto": {
             "type": "object",
             "properties": {
+                "_id": {
+                    "type": "string"
+                },
                 "avatarUri": {
                     "type": "string"
                 },
-                "id": {
+                "chats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ChatOutputDto"
+                    }
+                },
+                "contacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserInfoExtendedOutputDto"
+                    }
+                },
+                "createdAt": {
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserInfoOutputDto": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "avatarUri": {
+                    "type": "string"
+                },
+                "chats": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "contacts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }

@@ -1,5 +1,16 @@
 basePath: /
 definitions:
+  dto.AddChatInputDto:
+    properties:
+      chatName:
+        minLength: 2
+        type: string
+      username:
+        minLength: 2
+        type: string
+    required:
+    - username
+    type: object
   dto.AddContactInputDto:
     properties:
       username:
@@ -7,6 +18,27 @@ definitions:
         type: string
     required:
     - username
+    type: object
+  dto.ChatOutputDto:
+    properties:
+      _id:
+        type: string
+      createdAt:
+        type: string
+      iconUri:
+        type: string
+      lastMessage:
+        type: string
+      muted:
+        type: boolean
+      name:
+        type: string
+      updatedAt:
+        type: string
+      users:
+        items:
+          type: string
+        type: array
     type: object
   dto.LoginInputDto:
     properties:
@@ -44,13 +76,46 @@ definitions:
       id:
         type: string
     type: object
-  dto.UserInfoOutputDto:
+  dto.UserInfoExtendedOutputDto:
     properties:
+      _id:
+        type: string
       avatarUri:
         type: string
-      id:
+      chats:
+        items:
+          $ref: '#/definitions/dto.ChatOutputDto'
+        type: array
+      contacts:
+        items:
+          $ref: '#/definitions/dto.UserInfoExtendedOutputDto'
+        type: array
+      createdAt:
         type: string
       name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.UserInfoOutputDto:
+    properties:
+      _id:
+        type: string
+      avatarUri:
+        type: string
+      chats:
+        items:
+          type: string
+        type: array
+      contacts:
+        items:
+          type: string
+        type: array
+      createdAt:
+        type: string
+      name:
+        type: string
+      updatedAt:
         type: string
     type: object
   httpexp.HttpExp:
@@ -72,6 +137,179 @@ info:
   title: sChat Server API
   version: "1.0"
 paths:
+  /api/chat/list:
+    get:
+      description: Paginated list of User chats
+      parameters:
+      - description: page number
+        in: path
+        name: page
+        type: string
+      - description: page size
+        in: path
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ChatOutputDto'
+            type: array
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: List chats paginated
+      tags:
+      - chat
+  /api/chat/list/all:
+    get:
+      description: Unpaginated list of all user chats
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ChatOutputDto'
+            type: array
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: List all chats
+      tags:
+      - chat
+  /api/chat/new:
+    put:
+      consumes:
+      - application/json
+      description: Establish new chat for two users
+      parameters:
+      - description: New chat input
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddChatInputDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: Create new chat
+      tags:
+      - chat
+  /api/user/contact/add:
+    put:
+      consumes:
+      - application/json
+      description: Adding another user as a contact
+      parameters:
+      - description: New contact input
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddContactInputDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: Add contact to User
+      tags:
+      - contact
+  /api/user/contact/list:
+    get:
+      description: Paginated list of User contacts
+      parameters:
+      - description: page number
+        in: path
+        name: page
+        type: string
+      - description: page size
+        in: path
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.UserInfoOutputDto'
+            type: array
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: List contacts paginated
+      tags:
+      - contact
+  /api/user/contact/list/all:
+    get:
+      description: Unpaginated list of all contacts of User
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.UserInfoOutputDto'
+            type: array
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: List all contacts
+      tags:
+      - contact
+  /api/user/me:
+    get:
+      description: ME endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User object extended
+          schema:
+            $ref: '#/definitions/dto.UserInfoExtendedOutputDto'
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: Get user info
+      tags:
+      - user
   /auth/login:
     post:
       consumes:
@@ -124,77 +362,6 @@ paths:
       summary: Register user
       tags:
       - auth
-  /user/contact/add:
-    put:
-      consumes:
-      - application/json
-      description: Adding another user as a contact
-      parameters:
-      - description: New contact input
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddContactInputDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "404":
-          description: Not found user
-          schema:
-            $ref: '#/definitions/httpexp.HttpExp'
-      security:
-      - BearerAuth: []
-      summary: Add contact to User
-      tags:
-      - contact
-  /user/contact/list:
-    get:
-      description: Unpaginated list of all contacts of User
-      parameters:
-      - description: page size
-        in: path
-        name: size
-        type: string
-      - description: page number
-        in: path
-        name: page
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "404":
-          description: Not found user
-          schema:
-            $ref: '#/definitions/httpexp.HttpExp'
-      security:
-      - BearerAuth: []
-      summary: List contacts paginated
-      tags:
-      - contact
-  /user/me:
-    get:
-      description: ME endpoint
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User object
-          schema:
-            $ref: '#/definitions/dto.UserInfoOutputDto'
-        "404":
-          description: Not found user
-          schema:
-            $ref: '#/definitions/httpexp.HttpExp'
-      security:
-      - BearerAuth: []
-      summary: Get user info
-      tags:
-      - user
 securityDefinitions:
   BearerAuth:
     in: header
