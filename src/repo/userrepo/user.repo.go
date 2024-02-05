@@ -50,12 +50,12 @@ func (repo *UserRepo) GetUserByID(ctx context.Context, id string) (*model.User, 
 
 	var user *model.User
 	var err error
-	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}).Decode(&user); err != nil {
+	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}).Decode(&user); err != nil || user == nil {
 		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
+		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
+			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
+		}
 		return nil, err
-	}
-	if user == nil {
-		return nil, cmnerr.ErrNotFoundEntity
 	}
 
 	return user, err
@@ -219,22 +219,20 @@ func (repo *UserRepo) GetUsers(ctx context.Context, page int, limit int) (*[]mod
 
 func (repo *UserRepo) GetUserByName(ctx context.Context, name string) (*model.User, error) {
 	records := repo.collection.FindOne(ctx, bson.D{{Key: "name", Value: name}}, options.FindOne().SetProjection(bson.D{
-		{Key: "contacts", Value: 0},
-		{Key: "chats", Value: 0},
+		// {Key: "contacts", Value: 0},
+		// {Key: "chats", Value: 0},
 	}))
 	// TODO: defect if not omit "contacts" field
 
 	var user *model.User
 	if err := records.Decode(&user); err != nil || user == nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
+		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
 		slog.Error("cannot retrieve user", slog.Any("error", err.Error()))
 		return nil, err
 	}
-	if user == nil {
-		return nil, cmnerr.ErrNotFoundEntity
-	}
+
 	return user, nil
 }
 

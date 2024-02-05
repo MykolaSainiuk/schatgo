@@ -20,6 +20,7 @@ type IServer interface {
 type IDatabase interface {
 	GetCollection(string) *mongo.Collection
 	Shutdown()
+	StartTransaction() (mongo.Session, error)
 }
 
 type PaginationParams struct {

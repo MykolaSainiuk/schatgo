@@ -18,6 +18,7 @@ import (
 type ChatRepo struct {
 	name       string
 	collection *mongo.Collection
+	db         types.IDatabase
 }
 
 func NewChatRepo(db types.IDatabase) *ChatRepo {
@@ -25,7 +26,32 @@ func NewChatRepo(db types.IDatabase) *ChatRepo {
 	return &ChatRepo{
 		name:       "chats",
 		collection: db.GetCollection(name),
+		db:         db,
 	}
+}
+
+func (repo *ChatRepo) GetDB() types.IDatabase {
+	return repo.db
+}
+
+func (repo *ChatRepo) GetExistingChat(ctx context.Context, userId primitive.ObjectID, anotherUserId primitive.ObjectID) (*model.Chat, error) {
+	var chat *model.Chat
+	var err error
+	if err = repo.collection.FindOne(ctx, bson.D{{
+		Key: "$or",
+		Value: []bson.D{
+			{{Key: "users", Value: []primitive.ObjectID{userId, anotherUserId}}},
+			{{Key: "users", Value: []primitive.ObjectID{anotherUserId, userId}}},
+		}},
+	}).Decode(&chat); err != nil || chat == nil {
+		slog.Error("cannot retrieve chat from chats collection", slog.Any("error", err.Error()))
+		if errors.Is(err, mongo.ErrNoDocuments) || chat == nil {
+			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
+		}
+		return nil, err
+	}
+
+	return chat, err
 }
 
 func (repo *ChatRepo) SaveChat(ctx context.Context, data *model.Chat) (*model.Chat, error) {
@@ -33,8 +59,7 @@ func (repo *ChatRepo) SaveChat(ctx context.Context, data *model.Chat) (*model.Ch
 	if err == nil {
 		slog.Debug("saved chat", slog.String("ID", r.InsertedID.(primitive.ObjectID).String()))
 
-		chatId := r.InsertedID.(primitive.ObjectID).Hex()
-		return repo.GetChatByID(ctx, chatId)
+		return repo.GetChatByID(ctx, r.InsertedID.(primitive.ObjectID))
 	}
 
 	errText := err.Error()
@@ -46,20 +71,17 @@ func (repo *ChatRepo) SaveChat(ctx context.Context, data *model.Chat) (*model.Ch
 	return nil, err
 }
 
-func (repo *ChatRepo) GetChatByID(ctx context.Context, id string) (*model.Chat, error) {
-	_id, _ := primitive.ObjectIDFromHex(id)
-
-	var user *model.Chat
+func (repo *ChatRepo) GetChatByID(ctx context.Context, id primitive.ObjectID) (*model.Chat, error) {
+	var chat *model.Chat
 	var err error
-	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}).Decode(&user); err != nil {
+	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}}).Decode(&chat); err != nil || chat == nil {
 		slog.Error("cannot retrieve chat from chats collection", slog.Any("error", err.Error()))
+		if errors.Is(err, mongo.ErrNoDocuments) || chat == nil {
+			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
+		}
 		return nil, err
 	}
-	if user == nil {
-		return nil, cmnerr.ErrNotFoundEntity
-	}
-
-	return user, err
+	return chat, err
 }
 
 func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ...any) ([]model.Chat, error) {

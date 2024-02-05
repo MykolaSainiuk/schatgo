@@ -386,8 +386,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "chatName": {
-                    "type": "string",
-                    "minLength": 2
+                    "type": "string"
                 },
                 "username": {
                     "type": "string",

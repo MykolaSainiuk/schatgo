@@ -47,11 +47,12 @@ func ConnectDB(dbName string) (*Database, error) {
 
 	// create empty db if there is no such
 	dbInst := client.Database(dbName)
+
 	// "migrations"
 	collections := RollUpAndGetCollections(dbInst, dbName)
 
 	db := &Database{
-		Database:    client.Database(dbName),
+		Database:    dbInst,
 		Client:      client,
 		Name:        dbName,
 		Context:     dbConnCtx,
@@ -90,4 +91,8 @@ func (db *Database) Shutdown() {
 			slog.Error(err.Error())
 		}
 	}
+}
+
+func (db *Database) StartTransaction() (mongo.Session, error) {
+	return db.Client.StartSession()
 }

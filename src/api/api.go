@@ -1,6 +1,10 @@
 package api
 
 import (
+	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/go-chi/chi/v5"
 
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
@@ -59,4 +63,12 @@ func InitRoutes(srv types.IServer) {
 	r := srv.GetRouter()
 
 	r.Mount("/api", apiRouter(srv))
+
+	if os.Getenv("NODE_ENV") != "production" {
+		// 👇 the walking function 🚶‍♂️ to print routes
+		chi.Walk(r, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+			fmt.Printf("[%s]: '%s' has %d middlewares\n", method, route, len(middlewares))
+			return nil
+		})
+	}
 }

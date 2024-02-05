@@ -8,6 +8,7 @@ networks:
 services:
   schat_mongodb:
     image: mongodb/mongodb-community-server:7.0.1-ubi8
+    # command: ["/usr/bin/mongosh", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     restart: always
     env_file:
       - ./.env
@@ -15,6 +16,7 @@ services:
       - ${DB_PORT:-27017}:27017
     volumes:
       # - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      # - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
       - schat_mongodb_volume:/data/db
     networks:
       - schat_network

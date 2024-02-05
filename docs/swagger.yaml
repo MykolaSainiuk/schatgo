@@ -3,7 +3,6 @@ definitions:
   dto.AddChatInputDto:
     properties:
       chatName:
-        minLength: 2
         type: string
       username:
         minLength: 2

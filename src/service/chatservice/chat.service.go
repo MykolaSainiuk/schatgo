@@ -2,8 +2,11 @@ package chatservice
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
@@ -11,7 +14,6 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/model"
 	"github.com/MykolaSainiuk/schatgo/src/repo/chatrepo"
 	"github.com/MykolaSainiuk/schatgo/src/service/userservice"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ChatService struct {
@@ -36,6 +38,15 @@ func (service *ChatService) CreateChat(ctx context.Context, userId string, data 
 	}
 
 	_userId, _ := primitive.ObjectIDFromHex(userId)
+	existingChat, err := service.chatRepo.GetExistingChat(ctx, _userId, anotherUser.ID)
+	if err != nil && !errors.Is(err, cmnerr.ErrNotFoundEntity){
+		return nil, err
+	}
+	if existingChat != nil {
+		return existingChat, nil
+	}
+
+
 	newUserItem := &model.Chat{
 		Name:        data.ChatName,
 		Muted:       false,
@@ -46,15 +57,40 @@ func (service *ChatService) CreateChat(ctx context.Context, userId string, data 
 		UpdatedAt:   time.Now(),
 	}
 
+	// trxSession, err := service.chatRepo.GetDB().StartTransaction()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer trxSession.EndSession(ctx)
+
+	// // Step 1: Define the callback that specifies the sequence of operations to perform inside the transaction.
+	// result, err := trxSession.WithTransaction(ctx, func(sessionCtx mongo.SessionContext) (interface{}, error) {
+	// 	// Important: You must pass sessionCtx as the Context parameter to the operations for them to be executed in the transaction.
+	// 	newChat, err1 := service.chatRepo.SaveChat(sessionCtx, newUserItem)
+	// 	if err != nil {
+	// 		slog.Info("error saving chat")
+	// 		return nil, err1
+	// 	}
+
+	// 	err2 := service.userService.RegisterNewChat(sessionCtx, newChat.ID, userId, anotherUser.ID.Hex())
+
+	// 	return newChat, errors.Join(err1, err2)
+	// })
+
+	// newChat, ok := result.(*model.Chat)
+	// if !ok {
+	// 	return nil, errors.Join(err, errors.New("cannot cast result (newChat) to *model.Chat"))
+	// }
+
 	newChat, err := service.chatRepo.SaveChat(ctx, newUserItem)
 	if err != nil {
 		slog.Info("error saving chat")
 		return nil, err
 	}
 
-	err = service.userService.RegisterNewChat(ctx, newChat.ID, userId, anotherUser.ID.Hex())
+	err2 := service.userService.RegisterNewChat(ctx, newChat.ID, userId, anotherUser.ID.Hex())
 
-	return newChat, err
+	return newChat, errors.Join(err, err2)
 }
 
 func (service *ChatService) GetAllChats(ctx context.Context, userID string) ([]model.Chat, error) {

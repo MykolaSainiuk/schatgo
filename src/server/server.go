@@ -22,13 +22,13 @@ type Server struct {
 }
 
 func Setup() types.IServer {
-	r := router.SetupRouter()
-
 	dbConn, err := db.ConnectDB(os.Getenv("MONGO_INITDB_DATABASE"))
 	if err != nil {
 		slog.Error("failed to connect MongoDB")
 		os.Exit(1)
 	}
+
+	r := router.SetupRouter()
 
 	return &Server{
 		router: r,
