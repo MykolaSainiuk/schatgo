@@ -4,8 +4,10 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strconv"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -49,7 +51,12 @@ func ConnectDB(dbName string) (*Database, error) {
 	dbInst := client.Database(dbName)
 
 	// "migrations"
-	collections := RollUpAndGetCollections(dbInst, dbName)
+	collections, err := RollUpAndGetCollections(dbConnCtx, dbInst, dbName)
+	if err != nil {
+		slog.Error("Cannot roll up MongoDB metadata", slog.Any("error", err.Error()))
+		dbConnCancelFn()
+		return nil, err
+	}
 
 	db := &Database{
 		Database:    dbInst,
@@ -63,7 +70,7 @@ func ConnectDB(dbName string) (*Database, error) {
 	return db, nil
 }
 
-func RollUpAndGetCollections(db *mongo.Database, dbName string) map[string]*mongo.Collection {
+func RollUpAndGetCollections(ctx context.Context, db *mongo.Database, dbName string) (map[string]*mongo.Collection, error) {
 	collections := make(map[string]*mongo.Collection)
 
 	// init collections
@@ -72,9 +79,39 @@ func RollUpAndGetCollections(db *mongo.Database, dbName string) map[string]*mong
 	collections["messages"] = db.Collection("messages")
 	collections["tokens"] = db.Collection("tokens")
 
-	slog.Info("MongoDB metadata rolled up successfully")
+	// indices
+	tokenIndices := db.Collection("tokens").Indexes()
+	indexModel1 := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "userId", Value: 1},
+			{Key: "type", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	}
+	_, err := tokenIndices.CreateOne(ctx, indexModel1)
+	if err != nil {
+		slog.Error("Cannot create index for tokens collection", slog.Any("error", err.Error()))
+		return nil, err
+	}
 
-	return collections
+	accessTokenLifetime, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_EXPIRATION_SECONDS"))
+	if err != nil {
+		accessTokenLifetime = 3600
+	}
+	indexModel2 := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "encoded", Value: 1},
+		},
+		Options: options.Index().SetExpireAfterSeconds(int32(accessTokenLifetime)),
+	}
+	_, err = tokenIndices.CreateOne(ctx, indexModel2)
+	if err != nil {
+		slog.Error("Cannot create index for tokens collection", slog.Any("error", err.Error()))
+		return nil, err
+	}
+
+	slog.Info("MongoDB metadata rolled up successfully")
+	return collections, nil
 }
 
 func (db *Database) GetCollection(name string) *mongo.Collection {

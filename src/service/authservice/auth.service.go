@@ -14,16 +14,19 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/helper/jwthelper"
 	"github.com/MykolaSainiuk/schatgo/src/helper/pwdhelper"
 	"github.com/MykolaSainiuk/schatgo/src/model"
+	"github.com/MykolaSainiuk/schatgo/src/repo/tokenrepo"
 	"github.com/MykolaSainiuk/schatgo/src/repo/userrepo"
 )
 
 type AuthService struct {
-	userRepo *userrepo.UserRepo
+	userRepo  *userrepo.UserRepo
+	tokenRepo *tokenrepo.TokenRepo
 }
 
 func NewAuthService(srv types.IServer) *AuthService {
 	return &AuthService{
-		userRepo: userrepo.NewUserRepo(srv.GetDB()),
+		userRepo:  userrepo.NewUserRepo(srv.GetDB()),
+		tokenRepo: tokenrepo.NewTokenRepo(srv.GetDB()),
 	}
 }
 
@@ -70,6 +73,22 @@ func (service *AuthService) LoginUser(ctx context.Context, name string, rawPassw
 	if err != nil {
 		slog.Error("failed to generate token", slog.Any("error", err))
 		return "", errors.Join(cmnerr.ErrGenerateAccessToken, err)
+	}
+
+	err = service.tokenRepo.DeleteUserAccessTokens(ctx, user.ID)
+	if err != nil {
+		slog.Error("failed to delete user tokens", slog.Any("error", err))
+		return "", err
+	}
+	_, err = service.tokenRepo.SaveToken(ctx, &model.Token{
+		UserId:   user.ID,
+		Username: user.Name,
+		Type:     model.TokenTypeAccess,
+		Encoded:  accessToken,
+	})
+	if err != nil {
+		slog.Error("failed to save token", slog.Any("error", err))
+		return "", err
 	}
 
 	return accessToken, nil

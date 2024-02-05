@@ -2,16 +2,35 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
+	"sync"
 
+	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/helper/jwthelper"
+
+	"github.com/MykolaSainiuk/schatgo/src/repo/tokenrepo"
+)
+
+var (
+	trOnce sync.Once
+	repo   *tokenrepo.TokenRepo = nil
 )
 
 func Authorized(dbRef types.IDatabase) func(http.Handler) http.Handler {
+	trOnce.Do(func() {
+		repo = tokenrepo.NewTokenRepo(dbRef)
+	})
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if repo == nil {
+				cmnerr.Reply500(w, ErrTokenRepoNotInitialized)
+				return
+			}
+
 			var accessToken string
 			if accessToken = getAuthHeader(r); accessToken == "" {
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -25,7 +44,11 @@ func Authorized(dbRef types.IDatabase) func(http.Handler) http.Handler {
 				return
 			}
 
-			// TOD: go to DB and check
+			ok, err := repo.ExistToken(r.Context(), &accessToken)
+			if err != nil || !ok {
+				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				return
+			}
 
 			// r.Header.Set("UserId", payload.UserID)
 			ctx := context.WithValue(r.Context(), types.TokenPayload{}, payload)
@@ -47,3 +70,7 @@ func getAuthHeader(r *http.Request) string {
 	}
 	return ""
 }
+
+var (
+	ErrTokenRepoNotInitialized = errors.New("toke repo not initialized")
+)
