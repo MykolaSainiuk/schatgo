@@ -92,16 +92,20 @@ func (service *ChatService) CreateChat(ctx context.Context, userId string, data 
 	return newChat, errors.Join(err, err2)
 }
 
-func (service *ChatService) GetAllChats(ctx context.Context, userID string) ([]model.Chat, error) {
+func (service *ChatService) GetAllChats(ctx context.Context, userID string) ([]model.ChatPopulated, error) {
 	return service.chatRepo.GetChatsByUserID(ctx, userID, types.PaginationParams{})
 }
 
-func (service *ChatService) GetChatsPaginated(ctx context.Context, userID string, pgParams types.PaginationParams) ([]model.Chat, error) {
+func (service *ChatService) GetChatsPaginated(ctx context.Context, userID string, pgParams types.PaginationParams) ([]model.ChatPopulated, error) {
 	return service.chatRepo.GetChatsByUserID(ctx, userID, pgParams)
 }
 
 func (service *ChatService) GetChatById(ctx context.Context, chatID primitive.ObjectID) (*model.Chat, error) {
 	return service.chatRepo.GetChatByID(ctx, chatID)
+}
+
+func (service *ChatService) SetLastMessage(ctx context.Context, chatID, messageID primitive.ObjectID) error {
+	return service.chatRepo.SetLastMessage(ctx, chatID, messageID)
 }
 
 // func (service *ChatService) GetChat(ctx context.Context, chatID string) (*model.ChatPopulated, error) {

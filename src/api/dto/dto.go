@@ -77,6 +77,18 @@ type ChatOutputDto struct {
 	UpdatedAt   string               `json:"updatedAt"`
 }
 
+// ChatExtendedOutputDto
+type ChatExtendedOutputDto struct {
+	ID          string              `json:"_id"`
+	Name        string              `json:"name"`
+	IconUri     string              `json:"iconUri"`
+	Muted       bool                `json:"muted"`
+	Users       []UserInfoOutputDto `json:"users"`
+	LastMessage MessageOutputDto    `json:"lastMessage"`
+	CreatedAt   string              `json:"createdAt"`
+	UpdatedAt   string              `json:"updatedAt"`
+}
+
 // NewMessageInputDto
 type NewMessageInputDto struct {
 	Text  string `json:"text" validate:"required,min=1"`

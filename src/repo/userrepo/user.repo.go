@@ -14,6 +14,7 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
+	"github.com/MykolaSainiuk/schatgo/src/repo/repohelper"
 )
 
 type UserRepo struct {
@@ -87,13 +88,11 @@ func (repo *UserRepo) GetUserByIdPopulated(ctx context.Context, id string) (*mod
 	var users []any
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &users); err != nil {
-		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 	if len(users) == 0 {
@@ -106,95 +105,26 @@ func (repo *UserRepo) GetUserByIdPopulated(ctx context.Context, id string) (*mod
 	}
 	user := d.Map()
 
-	contacts := []model.User{}
+	contacts := []*model.User{}
 	rawContacts, ok := user["contacts"].(primitive.A)
 	if ok && len(rawContacts) > 0 {
 		for _, v := range rawContacts {
-			contacts = append(contacts, rawDocToUserModel(v.(primitive.D).Map()))
+			contacts = append(contacts, repohelper.RawDocToUserModel(v.(primitive.D).Map()))
 		}
 	}
-	chats := []model.Chat{}
+	chats := []*model.Chat{}
 	rawChats, ok := user["chats"].(primitive.A)
 	if ok && len(rawChats) > 0 {
 		for _, v := range rawChats {
-			chats = append(chats, rawDocToChatModel(v.(primitive.D).Map()))
+			chats = append(chats, repohelper.RawPlainDocToChatModel(v.(primitive.D).Map()))
 		}
 	}
 
 	return &model.UserPopulated{
-		User:     rawDocToUserModel(user),
+		User:     repohelper.RawDocToUserModel(user),
 		Contacts: contacts,
 		Chats:    chats,
 	}, nil
-}
-
-func rawDocToUserModel(rawDoc map[string]any) model.User {
-	rcontacts, _ := rawDoc["contacts"].(primitive.A)
-	rchats, _ := rawDoc["chats"].(primitive.A)
-
-	contacts, chats := shrinkObjectsToItsIDs(rcontacts), shrinkObjectsToItsIDs(rchats)
-
-	return model.User{
-		ID:        rawDoc["_id"].(primitive.ObjectID),
-		Name:      rawDoc["name"].(string),
-		AvatarUri: rawDoc["avatarUri"].(string),
-		Hash:      rawDoc["hash"].(string),
-
-		Contacts: contacts,
-		Chats:    chats,
-
-		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
-		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
-	}
-}
-
-func shrinkObjectsToItsIDs(objects primitive.A) []primitive.ObjectID {
-	_ids := []primitive.ObjectID{}
-	for _, v := range objects {
-		_id, ok := v.(primitive.ObjectID)
-		if !ok {
-			_id, ok = v.(primitive.D).Map()["_id"].(primitive.ObjectID)
-		}
-		if ok {
-			_ids = append(_ids, _id)
-		}
-	}
-	return _ids
-}
-
-func rawDocToChatModel(rawDoc map[string]any) model.Chat {
-	users := []primitive.ObjectID{}
-	rco, ok := rawDoc["users"].(primitive.A)
-	if ok {
-		for _, v := range rco {
-			users = append(users, v.(primitive.ObjectID))
-		}
-	}
-	name, ok := rawDoc["name"].(string)
-	if !ok {
-		name = ""
-	}
-	iconUri, ok := rawDoc["iconUri"].(string)
-	if !ok {
-		iconUri = ""
-	}
-	lastMessage, ok := rawDoc["lastMessage"].(primitive.ObjectID)
-	if !ok {
-		lastMessage = primitive.NilObjectID
-	}
-
-	return model.Chat{
-		ID:      rawDoc["_id"].(primitive.ObjectID),
-		Name:    name,
-		Muted:   rawDoc["muted"].(bool),
-		IconUri: iconUri,
-
-		Users:       users,
-		LastMessage: lastMessage,
-
-		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
-		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
-	}
 }
 
 func (repo *UserRepo) GetUsers(ctx context.Context, page int, limit int) (*[]model.User, error) {
@@ -202,7 +132,6 @@ func (repo *UserRepo) GetUsers(ctx context.Context, page int, limit int) (*[]mod
 
 	cursor, err := repo.collection.Find(ctx, bson.D{}, opts)
 	if err != nil || cursor == nil {
-		cursor.Close(ctx)
 		slog.Error("cannot retrieve users from collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
@@ -223,7 +152,7 @@ func (repo *UserRepo) GetUserByName(ctx context.Context, name string) (*model.Us
 		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
-		slog.Error("cannot retrieve user", slog.Any("error", err.Error()))
+		slog.Error("cannot retrieve user by name", slog.Any("error", err.Error()))
 		return nil, err
 	}
 
@@ -314,13 +243,11 @@ func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string, params
 	var contacts []model.User
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &contacts); err != nil {
-		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 

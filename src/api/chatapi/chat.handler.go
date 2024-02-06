@@ -123,7 +123,7 @@ func (handler *ChatHandler) ListChatsPaginated(w http.ResponseWriter, r *http.Re
 	renderChats(w, chats, err)
 }
 
-func renderChats(w http.ResponseWriter, chats []model.Chat, err error) {
+func renderChats(w http.ResponseWriter, chats []model.ChatPopulated, err error) {
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
 			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)

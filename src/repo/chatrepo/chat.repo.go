@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,12 +12,13 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
+	"github.com/MykolaSainiuk/schatgo/src/repo/repohelper"
 )
 
 type ChatRepo struct {
 	name       string
 	collection *mongo.Collection
-	db         types.IDatabase
+	// db         types.IDatabase
 }
 
 func NewChatRepo(db types.IDatabase) *ChatRepo {
@@ -26,72 +26,77 @@ func NewChatRepo(db types.IDatabase) *ChatRepo {
 	return &ChatRepo{
 		name:       "chats",
 		collection: db.GetCollection(name),
-		db:         db,
+		// db:         db,
 	}
 }
 
-func (repo *ChatRepo) GetDB() types.IDatabase {
-	return repo.db
-}
+// func (repo *ChatRepo) GetDB() types.IDatabase {
+// 	return repo.db
+// }
 
 func (repo *ChatRepo) GetExistingChat(ctx context.Context, userId primitive.ObjectID, anotherUserId primitive.ObjectID) (*model.Chat, error) {
 	var chat *model.Chat
-	var err error
-	if err = repo.collection.FindOne(ctx, bson.D{{
+	if err := repo.collection.FindOne(ctx, bson.D{{
 		Key: "$or",
 		Value: []bson.D{
 			{{Key: "users", Value: []primitive.ObjectID{userId, anotherUserId}}},
 			{{Key: "users", Value: []primitive.ObjectID{anotherUserId, userId}}},
 		}},
 	}).Decode(&chat); err != nil || chat == nil {
-		slog.Error("cannot retrieve chat from chats collection", slog.Any("error", err.Error()))
 		if errors.Is(err, mongo.ErrNoDocuments) || chat == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
 		return nil, err
 	}
-
-	return chat, err
+	return chat, nil
 }
 
 func (repo *ChatRepo) SaveChat(ctx context.Context, data *model.Chat) (*model.Chat, error) {
 	r, err := repo.collection.InsertOne(ctx, data)
 	if err == nil {
 		slog.Debug("saved chat", slog.String("ID", r.InsertedID.(primitive.ObjectID).String()))
-
 		return repo.GetChatByID(ctx, r.InsertedID.(primitive.ObjectID))
 	}
-
-	errText := err.Error()
-	if strings.Contains(errText, "duplicate key error collection") {
-		return nil, errors.Join(cmnerr.ErrUniqueViolation, err)
-	}
-
-	slog.Error("cannot save chat into chats collection", slog.String("error", errText))
 	return nil, err
 }
 
 func (repo *ChatRepo) GetChatByID(ctx context.Context, id primitive.ObjectID) (*model.Chat, error) {
 	var chat *model.Chat
-	var err error
-	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}}).Decode(&chat); err != nil || chat == nil {
-		slog.Error("cannot retrieve chat from chats collection", slog.Any("error", err.Error()))
+	if err := repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: id}}).Decode(&chat); err != nil || chat == nil {
 		if errors.Is(err, mongo.ErrNoDocuments) || chat == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
 		return nil, err
 	}
-	return chat, err
+	return chat, nil
 }
 
-func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ...any) ([]model.Chat, error) {
+func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ...any) ([]model.ChatPopulated, error) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
 	match := bson.D{{Key: "$match", Value: bson.D{{
 		Key: "users", Value: _id,
 	}}}}
 
-	pipelineStages := mongo.Pipeline{match}
+	ls1 := bson.D{
+		{Key: "from", Value: "users"},
+		{Key: "localField", Value: "users"},
+		{Key: "foreignField", Value: "_id"},
+		{Key: "as", Value: "users"},
+	}
+	lookup1 := bson.D{{Key: "$lookup", Value: ls1}}
+
+	ls2 := bson.D{
+		{Key: "from", Value: "messages"},
+		{Key: "localField", Value: "lastMessage"},
+		{Key: "foreignField", Value: "_id"},
+		{Key: "as", Value: "lastMessage"},
+	}
+	lookup2 := bson.D{{Key: "$lookup", Value: ls2}}
+	// {Key: "preserveNullAndEmptyArrays", Value: true}
+	unwind2 := bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$lastMessage"}}}}
+
+	pipelineStages := mongo.Pipeline{match, lookup1, lookup2, unwind2}
 
 	pgParam := params[0].(types.PaginationParams)
 	if pgParam.Limit != 0 {
@@ -103,21 +108,62 @@ func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ..
 		pipelineStages = append(pipelineStages, skip)
 	}
 
-	var chats []model.Chat
+	var chats []any
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		slog.Error("cannot retrieve chat from chats collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &chats); err != nil {
-		slog.Error("cannot retrieve chat from chats collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 
 	if len(chats) == 0 {
-		return make([]model.Chat, 0), nil
+		return make([]model.ChatPopulated, 0), nil
 	}
-	return chats, err
+
+	chatsPopulated := make([]model.ChatPopulated, 0, len(chats))
+	for i := range chats {
+		d, ok := chats[i].(primitive.D)
+		if !ok {
+			return nil, errors.New("cannot cast user to ChatPopulated")
+		}
+		chat := d.Map()
+
+		users := []*model.User{}
+		rawUsers, ok := chat["users"].(primitive.A)
+		if ok && len(rawUsers) > 0 {
+			for _, v := range rawUsers {
+				users = append(users, repohelper.RawDocToUserModel(v.(primitive.D).Map()))
+			}
+		}
+
+		rawLM := chat["lastMessage"]
+
+		chatsPopulated = append(chatsPopulated, model.ChatPopulated{
+			Chat:        repohelper.RawDocToChatModel(chat),
+			Users:       users,
+			LastMessage: repohelper.RawPlainDocToMessageModel(rawLM.(primitive.D).Map()),
+		})
+	}
+
+	return chatsPopulated, nil
+}
+
+func (repo *ChatRepo) SetLastMessage(ctx context.Context, chatID, messageID primitive.ObjectID) error {
+	r, err := repo.collection.UpdateByID(ctx, chatID, bson.D{{
+		Key:   "$set",
+		Value: primitive.D{{Key: "lastMessage", Value: messageID}},
+	}})
+	if err != nil {
+		slog.Error("cannot update chat of chats collection", slog.Any("error", err.Error()))
+		return err
+	}
+	if r.MatchedCount == 0 {
+		return errors.Join(cmnerr.ErrNotFoundEntity, err)
+	}
+
+	slog.Debug("updated last message for chat", slog.String("ID", chatID.Hex()))
+	return nil
 }

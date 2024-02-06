@@ -21,8 +21,8 @@ type User struct {
 }
 
 type UserPopulated struct {
-	User
+	*User
 
-	Contacts []User `json:"contacts" bson:"contacts"`
-	Chats    []Chat `json:"chats" bson:"chats"`
+	Contacts []*User `json:"contacts" bson:"contacts"`
+	Chats    []*Chat `json:"chats" bson:"chats"`
 }

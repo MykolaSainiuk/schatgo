@@ -20,8 +20,8 @@ type Chat struct {
 }
 
 type ChatPopulated struct {
-	User
+	*Chat
 
-	Users       []User  `json:"users" bson:"Users"`
-	LastMessage Message `json:"lastMessage" bson:"lastMessage"`
+	Users       []*User  `json:"users" bson:"users"`
+	LastMessage *Message `json:"lastMessage" bson:"lastMessage"`
 }

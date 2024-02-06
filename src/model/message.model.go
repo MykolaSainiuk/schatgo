@@ -11,7 +11,7 @@ type Message struct {
 	Text  string             `json:"text" bson:"text"`
 	Image string             `json:"image" bson:"image"`
 
-	Sent     bool `json:"sent" bson:"muted"`
+	Sent     bool `json:"sent" bson:"sent"`
 	Received bool `json:"received" bson:"received"`
 	System   bool `json:"system" bson:"system"`
 

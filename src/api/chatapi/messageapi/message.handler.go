@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
@@ -57,10 +58,10 @@ func (handler *MessageHandler) NewMessage(w http.ResponseWriter, r *http.Request
 
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
-
 	chatId := chi.URLParam(r, "chatId")
-	id, err := handler.MessageService.NewMessage(ctx, chatId, userID, &body)
-	if err != nil || id == "" {
+
+	newMessageID, err := handler.MessageService.NewMessage(ctx, chatId, userID, &body)
+	if err != nil || newMessageID == primitive.NilObjectID {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
 			httpexp.From(err, cmnerr.ErrNotFoundEntity.Error(), http.StatusNotFound).Reply(w)
 			return
@@ -70,7 +71,7 @@ func (handler *MessageHandler) NewMessage(w http.ResponseWriter, r *http.Request
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	res, _ := json.Marshal(dto.NewMessageOutputDto{Id: id})
+	res, _ := json.Marshal(dto.NewMessageOutputDto{Id: newMessageID.Hex()})
 	w.Write(res)
 
 }
@@ -105,7 +106,7 @@ func (handler *MessageHandler) ListAllMessages(w http.ResponseWriter, r *http.Re
 //	@Param			page	path		string	false	"page number"
 //	@Param			limit	path		string	false	"page size"
 //	@Produce		json
-//	@Success		200		{array}		dto.ChatOutputDto
+//	@Success		200		{array}		dto.MessageOutputDto
 //	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
 //	@Router			/api/message/{chatId}/list [get]
 func (handler *MessageHandler) ListMessagesPaginated(w http.ResponseWriter, r *http.Request) {

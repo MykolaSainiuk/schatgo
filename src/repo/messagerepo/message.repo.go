@@ -2,15 +2,12 @@ package messagerepo
 
 import (
 	"context"
-	"errors"
 	"log/slog"
-	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
 )
@@ -28,20 +25,13 @@ func NewMessageRepo(db types.IDatabase) *MessageRepo {
 	}
 }
 
-func (repo *MessageRepo) SaveMessage(ctx context.Context, newToken *model.Message) (string, error) {
+func (repo *MessageRepo) SaveMessage(ctx context.Context, newToken *model.Message) (primitive.ObjectID, error) {
 	r, err := repo.collection.InsertOne(ctx, newToken)
 	if err == nil {
 		slog.Debug("saved message", slog.String("ID", r.InsertedID.(primitive.ObjectID).String()))
-		return r.InsertedID.(primitive.ObjectID).Hex(), nil
+		return r.InsertedID.(primitive.ObjectID), nil
 	}
-
-	errText := err.Error()
-	if strings.Contains(errText, "duplicate key error collection") {
-		return "", errors.Join(cmnerr.ErrUniqueViolation, err)
-	}
-
-	slog.Error("cannot save message into messages collection", slog.String("error", errText))
-	return "", err
+	return primitive.NilObjectID, err
 }
 
 func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, params ...any) ([]model.Message, error) {
@@ -66,13 +56,11 @@ func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, par
 	var messages []model.Message
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		slog.Error("cannot retrieve message from messages collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &messages); err != nil {
-		slog.Error("cannot retrieve message from messages collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 

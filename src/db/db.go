@@ -80,6 +80,16 @@ func RollUpAndGetCollections(ctx context.Context, db *mongo.Database, dbName str
 	collections["tokens"] = db.Collection("tokens")
 
 	// indices
+	indexModel0 := mongo.IndexModel{
+		Keys:    bson.D{{Key: "name", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	}
+	_, err := db.Collection("users").Indexes().CreateOne(ctx, indexModel0)
+	if err != nil {
+		slog.Error("Cannot create unique index for users collection", slog.Any("error", err.Error()))
+		return nil, err
+	}
+
 	tokenIndices := db.Collection("tokens").Indexes()
 	indexModel1 := mongo.IndexModel{
 		Keys: bson.D{
@@ -88,9 +98,9 @@ func RollUpAndGetCollections(ctx context.Context, db *mongo.Database, dbName str
 		},
 		Options: options.Index().SetUnique(true),
 	}
-	_, err := tokenIndices.CreateOne(ctx, indexModel1)
+	_, err = tokenIndices.CreateOne(ctx, indexModel1)
 	if err != nil {
-		slog.Error("Cannot create index for tokens collection", slog.Any("error", err.Error()))
+		slog.Error("Cannot create unique index for tokens collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 
@@ -99,14 +109,12 @@ func RollUpAndGetCollections(ctx context.Context, db *mongo.Database, dbName str
 		accessTokenLifetime = 3600
 	}
 	indexModel2 := mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "encoded", Value: 1},
-		},
+		Keys:    bson.D{{Key: "encoded", Value: 1}},
 		Options: options.Index().SetExpireAfterSeconds(int32(accessTokenLifetime)),
 	}
 	_, err = tokenIndices.CreateOne(ctx, indexModel2)
 	if err != nil {
-		slog.Error("Cannot create index for tokens collection", slog.Any("error", err.Error()))
+		slog.Error("Cannot create time-series index for tokens collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 

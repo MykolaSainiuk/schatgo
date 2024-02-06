@@ -30,21 +30,21 @@ func NewMessageService(srv types.IServer) *MessageService {
 	}
 }
 
-func (service *MessageService) NewMessage(ctx context.Context, chatId string, userId string, data *dto.NewMessageInputDto) (string, error) {
+func (service *MessageService) NewMessage(ctx context.Context, chatId string, userId string, data *dto.NewMessageInputDto) (primitive.ObjectID, error) {
 	_chatId, _ := primitive.ObjectIDFromHex(chatId)
 
 	chat, err := service.chatService.GetChatById(ctx, _chatId)
 	if err != nil || chat == nil {
 		slog.Info("no chat found by such id")
-		return "", errors.Join(cmnerr.ErrNotFoundEntity, err)
+		return primitive.NilObjectID, errors.Join(cmnerr.ErrNotFoundEntity, err)
 	}
 
 	_userId, _ := primitive.ObjectIDFromHex(userId)
 	newMessage := &model.Message{
 		Text:      data.Text,
 		Image:     data.Image,
-		Sent:      false,
-		Received:  false,
+		Sent:      true,
+		Received:  true,
 		System:    false,
 		User:      _userId,
 		Chat:      _chatId,
@@ -52,7 +52,15 @@ func (service *MessageService) NewMessage(ctx context.Context, chatId string, us
 		UpdatedAt: time.Now(),
 	}
 
-	return service.messageRepo.SaveMessage(ctx, newMessage)
+	newMessageId, err := service.messageRepo.SaveMessage(ctx, newMessage)
+	if err != nil || newMessageId == primitive.NilObjectID {
+		slog.Error("cannot save message", slog.Any("error", err))
+		return primitive.NilObjectID, err
+	}
+
+	err = service.chatService.SetLastMessage(ctx, chat.ID, newMessageId)
+
+	return newMessageId, err
 }
 
 func (service *MessageService) GetAllMessages(ctx context.Context, chatID string) ([]model.Message, error) {

@@ -34,11 +34,7 @@ func (repo *TokenRepo) DeleteUserAccessTokens(ctx context.Context, userId primit
 		"userId": userId,
 		"type":   model.TokenTypeAccess,
 	})
-	if err != nil {
-		slog.Error("cannot delete user tokens", slog.Any("error", err))
-		return err
-	}
-	return nil
+	return err
 }
 
 func (repo *TokenRepo) SaveToken(ctx context.Context, newToken *model.Token) (string, error) {

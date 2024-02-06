@@ -49,13 +49,7 @@ func GenerateToken(userID string, userName string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenStr, err := token.SignedString(JwtServerData.secretKey)
-	if err != nil {
-		slog.Error("failed to generate auth token")
-		return "", err
-	}
-
-	return tokenStr, nil
+	return token.SignedString(JwtServerData.secretKey)
 }
 
 // func ValidateToken(encodedToken string) (*jwt.Token, error) {
@@ -101,11 +95,8 @@ func getSecretKey() []byte {
 
 func getAuthTokenExpr() int {
 	expr := os.Getenv("ACCESS_TOKEN_EXPIRATION_SECONDS")
-	if expr == "" {
-		expr = "24"
-	}
 	n, err := strconv.Atoi(expr)
-	if err != nil {
+	if err != nil || n == 0 {
 		slog.Warn("No expiration time for access token")
 		return DefaultAccessTokenLifetimeHrsInSeconds
 	}
