@@ -142,6 +142,156 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/message/{chatId}/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Paginated list of Chat messages",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "message"
+                ],
+                "summary": "List messages paginated",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Chat ID",
+                        "name": "chatId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "page number",
+                        "name": "page",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ChatOutputDto"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/message/{chatId}/list/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Unpaginated list of all chat messages",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "message"
+                ],
+                "summary": "List all messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Chat ID",
+                        "name": "chatId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.MessageOutputDto"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found chat",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/message/{chatId}/new": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Add new message into the chat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "message"
+                ],
+                "summary": "Write new message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Chat ID",
+                        "name": "chatId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New contact input",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.NewMessageInputDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.NewMessageOutputDto"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/contact/add": {
             "put": {
                 "security": [
@@ -365,7 +515,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterResponseDto"
+                            "$ref": "#/definitions/dto.RegisterOutputDto"
                         }
                     },
                     "422": {
@@ -463,6 +613,64 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.MessageOutputDto": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "chat": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "received": {
+                    "type": "boolean"
+                },
+                "sent": {
+                    "type": "boolean"
+                },
+                "system": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.NewMessageInputDto": {
+            "type": "object",
+            "required": [
+                "text"
+            ],
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "dto.NewMessageOutputDto": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.RegisterInputDto": {
             "type": "object",
             "required": [
@@ -483,7 +691,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterResponseDto": {
+        "dto.RegisterOutputDto": {
             "type": "object",
             "properties": {
                 "id": {

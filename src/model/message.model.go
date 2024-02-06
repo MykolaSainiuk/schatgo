@@ -8,12 +8,12 @@ import (
 
 type Message struct {
 	ID    primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Text  string             `json:"text" bson:"name"`
-	Image string             `json:"image" bson:"name"`
+	Text  string             `json:"text" bson:"text"`
+	Image string             `json:"image" bson:"image"`
 
 	Sent     bool `json:"sent" bson:"muted"`
-	Received bool `json:"received" bson:"muted"`
-	System   bool `json:"system" bson:"muted"`
+	Received bool `json:"received" bson:"received"`
+	System   bool `json:"system" bson:"system"`
 
 	User primitive.ObjectID `json:"user" bson:"user"`
 	Chat primitive.ObjectID `json:"chat" bson:"chat"`

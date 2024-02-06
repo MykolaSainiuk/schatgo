@@ -30,3 +30,4 @@ logs
 
 # Go debug bin
 __debug*
+./build/*

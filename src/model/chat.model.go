@@ -18,3 +18,10 @@ type Chat struct {
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
+
+type ChatPopulated struct {
+	User
+
+	Users       []User  `json:"users" bson:"Users"`
+	LastMessage Message `json:"lastMessage" bson:"lastMessage"`
+}

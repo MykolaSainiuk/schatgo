@@ -22,7 +22,7 @@ type ChatHandler struct {
 }
 
 func NewChatHandler(srv types.IServer) *ChatHandler {
-	chatService := chatservice.NewUserService(srv)
+	chatService := chatservice.NewChatService(srv)
 	return &ChatHandler{chatService}
 }
 

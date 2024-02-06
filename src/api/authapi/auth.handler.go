@@ -32,7 +32,7 @@ func NewAuthHandler(srv types.IServer) *AuthHandler {
 //	@Accept			json
 //	@Produce		json
 //	@Param			body	body		dto.RegisterInputDto	true	"Registration form"
-//	@Success		201		{object}	dto.RegisterResponseDto	"Created"
+//	@Success		201		{object}	dto.RegisterOutputDto	"Created"
 //	@Failure		422		{object}	httpexp.HttpExp	"Validation error"
 //	@Router			/auth/register [post]
 func (handler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +64,7 @@ func (handler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	res, _ := json.Marshal(dto.RegisterResponseDto{UserId: userId})
+	res, _ := json.Marshal(dto.RegisterOutputDto{UserId: userId})
 	w.Write(res)
 }
 
@@ -107,8 +107,13 @@ func (handler *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(dto.LoginOutputDto{AccessToken: accessToken})
-	w.Write(res)
+	rawRes := r.URL.Query().Get("raw")
+	if rawRes == "true" {
+		w.Write([]byte(accessToken))
+	} else {
+		res, _ := json.Marshal(dto.LoginOutputDto{AccessToken: accessToken})
+		w.Write(res)
+	}
 }
 
 const (

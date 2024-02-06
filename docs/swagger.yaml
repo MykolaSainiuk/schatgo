@@ -56,6 +56,44 @@ definitions:
       token:
         type: string
     type: object
+  dto.MessageOutputDto:
+    properties:
+      _id:
+        type: string
+      chat:
+        type: string
+      createdAt:
+        type: string
+      image:
+        type: string
+      received:
+        type: boolean
+      sent:
+        type: boolean
+      system:
+        type: boolean
+      text:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        type: string
+    type: object
+  dto.NewMessageInputDto:
+    properties:
+      image:
+        type: string
+      text:
+        minLength: 1
+        type: string
+    required:
+    - text
+    type: object
+  dto.NewMessageOutputDto:
+    properties:
+      id:
+        type: string
+    type: object
   dto.RegisterInputDto:
     properties:
       avatarUri:
@@ -70,7 +108,7 @@ definitions:
     - name
     - password
     type: object
-  dto.RegisterResponseDto:
+  dto.RegisterOutputDto:
     properties:
       id:
         type: string
@@ -213,6 +251,101 @@ paths:
       summary: Create new chat
       tags:
       - chat
+  /api/message/{chatId}/list:
+    get:
+      description: Paginated list of Chat messages
+      parameters:
+      - description: Chat ID
+        in: path
+        name: chatId
+        required: true
+        type: string
+      - description: page number
+        in: path
+        name: page
+        type: string
+      - description: page size
+        in: path
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ChatOutputDto'
+            type: array
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: List messages paginated
+      tags:
+      - message
+  /api/message/{chatId}/list/all:
+    get:
+      description: Unpaginated list of all chat messages
+      parameters:
+      - description: Chat ID
+        in: path
+        name: chatId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.MessageOutputDto'
+            type: array
+        "404":
+          description: Not found chat
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: List all messages
+      tags:
+      - message
+  /api/message/{chatId}/new:
+    put:
+      consumes:
+      - application/json
+      description: Add new message into the chat
+      parameters:
+      - description: Chat ID
+        in: path
+        name: chatId
+        required: true
+        type: string
+      - description: New contact input
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NewMessageInputDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.NewMessageOutputDto'
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: Write new message
+      tags:
+      - message
   /api/user/contact/add:
     put:
       consumes:
@@ -353,7 +486,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.RegisterResponseDto'
+            $ref: '#/definitions/dto.RegisterOutputDto'
         "422":
           description: Validation error
           schema:

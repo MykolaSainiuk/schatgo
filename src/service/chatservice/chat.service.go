@@ -22,7 +22,7 @@ type ChatService struct {
 	userService *userservice.UserService
 }
 
-func NewUserService(srv types.IServer) *ChatService {
+func NewChatService(srv types.IServer) *ChatService {
 	return &ChatService{
 		chatRepo: chatrepo.NewChatRepo(srv.GetDB()),
 
@@ -39,13 +39,12 @@ func (service *ChatService) CreateChat(ctx context.Context, userId string, data 
 
 	_userId, _ := primitive.ObjectIDFromHex(userId)
 	existingChat, err := service.chatRepo.GetExistingChat(ctx, _userId, anotherUser.ID)
-	if err != nil && !errors.Is(err, cmnerr.ErrNotFoundEntity){
+	if err != nil && !errors.Is(err, cmnerr.ErrNotFoundEntity) {
 		return nil, err
 	}
 	if existingChat != nil {
 		return existingChat, nil
 	}
-
 
 	newUserItem := &model.Chat{
 		Name:        data.ChatName,
@@ -100,3 +99,11 @@ func (service *ChatService) GetAllChats(ctx context.Context, userID string) ([]m
 func (service *ChatService) GetChatsPaginated(ctx context.Context, userID string, pgParams types.PaginationParams) ([]model.Chat, error) {
 	return service.chatRepo.GetChatsByUserID(ctx, userID, pgParams)
 }
+
+func (service *ChatService) GetChatById(ctx context.Context, chatID primitive.ObjectID) (*model.Chat, error) {
+	return service.chatRepo.GetChatByID(ctx, chatID)
+}
+
+// func (service *ChatService) GetChat(ctx context.Context, chatID string) (*model.ChatPopulated, error) {
+// 	return service.chatRepo.GetChatByIdPopulated(ctx, chatID)
+// }

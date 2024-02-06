@@ -10,8 +10,8 @@ type RegisterInputDto struct {
 	AvatarUri string `json:"avatarUri" validate:"url|uri|base64url"`
 }
 
-// RegisterResponseDto
-type RegisterResponseDto struct {
+// RegisterOutputDto
+type RegisterOutputDto struct {
 	UserId string `json:"id"`
 }
 
@@ -75,4 +75,30 @@ type ChatOutputDto struct {
 	LastMessage primitive.ObjectID   `json:"lastMessage"`
 	CreatedAt   string               `json:"createdAt"`
 	UpdatedAt   string               `json:"updatedAt"`
+}
+
+// NewMessageInputDto
+type NewMessageInputDto struct {
+	Text  string `json:"text" validate:"required,min=1"`
+	Image string `json:"image"`
+	// Image string `json:"image" validate:"required_without=text,url|uri|base64url"`
+}
+
+// NewMessageOutputDto
+type NewMessageOutputDto struct {
+	Id string `json:"id"`
+}
+
+// MessageOutputDto
+type MessageOutputDto struct {
+	ID        string             `json:"_id"`
+	Text      string             `json:"text"`
+	Image     string             `json:"image"`
+	Sent      bool               `json:"sent"`
+	Received  bool               `json:"received"`
+	System    bool               `json:"system"`
+	User      primitive.ObjectID `json:"user"`
+	Chat      primitive.ObjectID `json:"chat"`
+	CreatedAt string             `json:"createdAt"`
+	UpdatedAt string             `json:"updatedAt"`
 }

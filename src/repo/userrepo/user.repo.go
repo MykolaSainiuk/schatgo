@@ -218,14 +218,8 @@ func (repo *UserRepo) GetUsers(ctx context.Context, page int, limit int) (*[]mod
 }
 
 func (repo *UserRepo) GetUserByName(ctx context.Context, name string) (*model.User, error) {
-	records := repo.collection.FindOne(ctx, bson.D{{Key: "name", Value: name}}, options.FindOne().SetProjection(bson.D{
-		// {Key: "contacts", Value: 0},
-		// {Key: "chats", Value: 0},
-	}))
-	// TODO: defect if not omit "contacts" field
-
 	var user *model.User
-	if err := records.Decode(&user); err != nil || user == nil {
+	if err := repo.collection.FindOne(ctx, bson.D{{Key: "name", Value: name}}).Decode(&user); err != nil || user == nil {
 		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}

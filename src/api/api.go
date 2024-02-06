@@ -12,6 +12,7 @@ import (
 
 	"github.com/MykolaSainiuk/schatgo/src/api/authapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/chatapi"
+	"github.com/MykolaSainiuk/schatgo/src/api/chatapi/messageapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/userapi"
 	"github.com/MykolaSainiuk/schatgo/src/api/userapi/contactapi"
 )
@@ -53,6 +54,16 @@ func apiRouter(srv types.IServer) chi.Router {
 			r.Put("/new", chatHandler.NewChat)
 			r.Get("/list/all", chatHandler.ListAllChats)
 			r.Get("/list", chatHandler.ListChatsPaginated)
+		})
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(AuthOnly)
+		msgHandler := messageapi.NewMessageHandler(srv)
+		r.Route("/message", func(r chi.Router) {
+			r.Put("/{chatId}/new", msgHandler.NewMessage)
+			r.Get("/{chatId}/list/all", msgHandler.ListAllMessages)
+			r.Get("/{chatId}/list", msgHandler.ListMessagesPaginated)
 		})
 	})
 
