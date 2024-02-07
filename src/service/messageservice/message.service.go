@@ -2,14 +2,12 @@ package messageservice
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/MykolaSainiuk/schatgo/src/api/dto"
-	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
 	"github.com/MykolaSainiuk/schatgo/src/repo/messagerepo"
@@ -33,10 +31,10 @@ func NewMessageService(srv types.IServer) *MessageService {
 func (service *MessageService) NewMessage(ctx context.Context, chatId string, userId string, data *dto.NewMessageInputDto) (primitive.ObjectID, error) {
 	_chatId, _ := primitive.ObjectIDFromHex(chatId)
 
-	chat, err := service.chatService.GetChatById(ctx, _chatId)
+	chat, err := service.chatService.GetChatByID(ctx, _chatId)
 	if err != nil || chat == nil {
 		slog.Info("no chat found by such id")
-		return primitive.NilObjectID, errors.Join(cmnerr.ErrNotFoundEntity, err)
+		return primitive.NilObjectID, err
 	}
 
 	_userId, _ := primitive.ObjectIDFromHex(userId)
@@ -54,7 +52,6 @@ func (service *MessageService) NewMessage(ctx context.Context, chatId string, us
 
 	newMessageId, err := service.messageRepo.SaveMessage(ctx, newMessage)
 	if err != nil || newMessageId == primitive.NilObjectID {
-		slog.Error("cannot save message", slog.Any("error", err))
 		return primitive.NilObjectID, err
 	}
 
@@ -69,4 +66,8 @@ func (service *MessageService) GetAllMessages(ctx context.Context, chatID string
 
 func (service *MessageService) GetMessagesPaginated(ctx context.Context, chatID string, pgParams types.PaginationParams) ([]model.Message, error) {
 	return service.messageRepo.GetMessagesByChatID(ctx, chatID, pgParams)
+}
+
+func (service *MessageService) ClearChatMessages(ctx context.Context, chatID string) error {
+	return service.messageRepo.RemoveAllMessagesByChatID(ctx, chatID)
 }

@@ -1,7 +1,7 @@
 {
     "client": "Thunder Client",
     "collectionName": "schat",
-    "dateExported": "2024-01-31T12:10:11.830Z",
+    "dateExported": "2024-02-06T19:03:06.907Z",
     "version": "1.1",
     "folders": [],
     "requests": [
@@ -14,7 +14,7 @@
             "method": "PUT",
             "sortNum": 68.3,
             "created": "2024-01-29T10:26:43.360Z",
-            "modified": "2024-01-29T10:26:43.360Z",
+            "modified": "2024-02-06T15:31:23.872Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -38,7 +38,7 @@
             "method": "GET",
             "sortNum": 136.7,
             "created": "2024-01-29T10:26:43.359Z",
-            "modified": "2024-01-29T10:26:43.359Z",
+            "modified": "2024-02-06T19:02:46.506Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -52,12 +52,31 @@
             "_id": "14f2820e-0f7a-4049-9fbd-098fff3eee0f",
             "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
-            "name": "remove chat",
-            "url": "http://localhost:{{port}}/api/chat/remove/653182019948064d6444855c",
+            "name": "clear chat",
+            "url": "http://localhost:{{port}}/api/chat/{{chatId}}/clear",
             "method": "DELETE",
             "sortNum": 273.4,
             "created": "2024-01-29T10:26:43.358Z",
-            "modified": "2024-01-29T10:26:43.358Z",
+            "modified": "2024-02-06T18:59:51.071Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "107b93f6-2d80-4d08-9861-593387be498a",
+            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
+            "containerId": "",
+            "name": "list my chats",
+            "url": "http://localhost:{{port}}/api/chat/list/all",
+            "method": "GET",
+            "sortNum": 468.8,
+            "created": "2024-01-29T10:26:43.357Z",
+            "modified": "2024-02-01T20:18:45.885Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -74,7 +93,7 @@
             "name": "new chat",
             "url": "http://localhost:{{port}}/api/chat/new",
             "method": "PUT",
-            "sortNum": 312.5,
+            "sortNum": 546.9,
             "created": "2024-01-29T10:26:43.354Z",
             "modified": "2024-01-29T10:26:43.354Z",
             "headers": [
@@ -92,25 +111,6 @@
             "tests": []
         },
         {
-            "_id": "107b93f6-2d80-4d08-9861-593387be498a",
-            "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
-            "containerId": "",
-            "name": "list my chats",
-            "url": "http://localhost:{{port}}/api/chat/list",
-            "method": "GET",
-            "sortNum": 468.8,
-            "created": "2024-01-29T10:26:43.357Z",
-            "modified": "2024-01-29T10:26:43.357Z",
-            "headers": [
-                {
-                    "name": "Authorization",
-                    "value": "Bearer {{token}}"
-                }
-            ],
-            "params": [],
-            "tests": []
-        },
-        {
             "_id": "e11da331-847f-4154-a040-a2cbe4a0e4b6",
             "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
@@ -119,7 +119,7 @@
             "method": "PUT",
             "sortNum": 625,
             "created": "2024-01-29T10:26:43.353Z",
-            "modified": "2024-01-31T10:01:24.954Z",
+            "modified": "2024-02-05T12:07:25.781Z",
             "headers": [
                 {
                     "name": "Authorization",
@@ -139,18 +139,29 @@
             "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "list my contacts",
-            "url": "http://localhost:{{port}}/api/user/contact/list",
+            "url": "http://localhost:{{port}}/api/user/contact/list?page=1&limit=5",
             "method": "GET",
             "sortNum": 937.5,
             "created": "2024-01-29T10:26:43.355Z",
-            "modified": "2024-01-30T19:41:29.868Z",
+            "modified": "2024-01-31T12:45:57.567Z",
             "headers": [
                 {
                     "name": "Authorization",
                     "value": "Bearer {{token}}"
                 }
             ],
-            "params": [],
+            "params": [
+                {
+                    "name": "page",
+                    "value": "1",
+                    "isPath": false
+                },
+                {
+                    "name": "limit",
+                    "value": "5",
+                    "isPath": false
+                }
+            ],
             "tests": []
         },
         {
@@ -196,13 +207,19 @@
             "colId": "f48e7d7f-ccf9-44c2-b8cb-926b8910e522",
             "containerId": "",
             "name": "login",
-            "url": "http://localhost:{{port}}/api/user/login",
+            "url": "http://localhost:{{port}}/api/user/login?raw=true",
             "method": "POST",
             "sortNum": 2500,
             "created": "2024-01-29T10:26:43.351Z",
-            "modified": "2024-01-29T10:26:43.351Z",
+            "modified": "2024-02-06T11:50:14.514Z",
             "headers": [],
-            "params": [],
+            "params": [
+                {
+                    "name": "raw",
+                    "value": "true",
+                    "isPath": false
+                }
+            ],
             "body": {
                 "type": "json",
                 "raw": "{\n  \"name\": \"Mykola Sainiuk\",\n  \"password\": \"rusnipuzda\"\n}",
@@ -238,12 +255,12 @@
             "method": "POST",
             "sortNum": 20000,
             "created": "2024-01-29T10:26:43.356Z",
-            "modified": "2024-01-30T19:41:09.281Z",
+            "modified": "2024-02-01T19:02:36.112Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"name\": \"Anatolii Olaru\",\n  \"password\": \"rusnipuzda\",\n  \"avatarUri\": \"https://scontent-waw1-1.xx.fbcdn.net/v/t31.18172-8/19466568_1577647395640829_873413256386085836_o.jpg?_nc_cat=111&ccb=1-7&_nc_sid=be3454&_nc_ohc=15QDjEI51lgAX-qsgtT&_nc_ht=scontent-waw1-1.xx&oh=00_AfCyUjGEM-mvnQHIWT_V3sO_BPefO4ucaLvdQAFYL1ddgQ&oe=65E0CABF\"\n}",
+                "raw": "{\n  \"name\": \"Test User\",\n  \"password\": \"rusnipuzda\",\n  \"avatarUri\": \"https://static.thenounproject.com/png/94245-200.png\"\n}",
                 "form": []
             },
             "tests": []

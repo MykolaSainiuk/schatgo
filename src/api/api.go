@@ -54,6 +54,7 @@ func apiRouter(srv types.IServer) chi.Router {
 			r.Put("/new", chatHandler.NewChat)
 			r.Get("/list/all", chatHandler.ListAllChats)
 			r.Get("/list", chatHandler.ListChatsPaginated)
+			r.Delete("/{chatId}/clear", chatHandler.ClearChat)
 		})
 	})
 

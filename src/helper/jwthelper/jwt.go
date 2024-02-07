@@ -26,12 +26,14 @@ type jwtDataStruct struct {
 //nolint:gochecknoglobals // quick way
 var JwtServerData *jwtDataStruct
 
-func InitJwtData() {
+func InitJwtData() bool {
 	JwtServerData = &jwtDataStruct{
 		secretKey: getSecretKey(),
 		issuer:    "schatgo",
 		expr:      getAuthTokenExpr(),
 	}
+	slog.Debug("JWT data initialized")
+	return len(JwtServerData.secretKey) > 0
 }
 
 func GenerateToken(userID string, userName string) (string, error) {
@@ -87,7 +89,6 @@ func getSecretKey() []byte {
 	secret := os.Getenv("JWT_SECRET_KEY")
 	if secret == "" {
 		slog.Error("No auth secret for access token")
-		os.Exit(1)
 		return nil
 	}
 	return []byte(secret)

@@ -2,6 +2,7 @@ package messagerepo
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,7 +32,8 @@ func (repo *MessageRepo) SaveMessage(ctx context.Context, newToken *model.Messag
 		slog.Debug("saved message", slog.String("ID", r.InsertedID.(primitive.ObjectID).String()))
 		return r.InsertedID.(primitive.ObjectID), nil
 	}
-	return primitive.NilObjectID, err
+
+	return primitive.NilObjectID, fmt.Errorf("cannot save message into messages collection: %w", err)
 }
 
 func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, params ...any) ([]model.Message, error) {
@@ -56,16 +58,23 @@ func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, par
 	var messages []model.Message
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot aggregate from messages collection: %w", err)
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &messages); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot decode messages from cursor: %w", err)
 	}
 
 	if len(messages) == 0 {
 		return make([]model.Message, 0), nil
 	}
-	return messages, err
+	return messages, nil
+}
+
+func (repo *MessageRepo) RemoveAllMessagesByChatID(ctx context.Context, id string) error {
+	_id, _ := primitive.ObjectIDFromHex(id)
+	_, err := repo.collection.DeleteMany(ctx, bson.D{{Key: "chat", Value: _id}})
+
+	return fmt.Errorf("cannot delete messages from messages collection: %w", err)
 }

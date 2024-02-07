@@ -124,29 +124,12 @@ func (handler *ContactHandler) ListContactsPaginated(w http.ResponseWriter, r *h
 
 func renderContacts(w http.ResponseWriter, contacts []model.User, err error) {
 	if err != nil {
-		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
-			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)
-			return
-		}
 		cmnerr.Reply500(w, err)
 		return
 	}
 
-	users := make([]dto.UserInfoOutputDto, len(contacts))
-	for i := range contacts {
-		users[i] = dto.UserInfoOutputDto{
-			ID:        contacts[i].ID.Hex(),
-			Name:      contacts[i].Name,
-			AvatarUri: contacts[i].AvatarUri,
-			Contacts: contacts[i].Contacts,
-			Chats: contacts[i].Chats,
-			CreatedAt: contacts[i].CreatedAt.String(),
-			UpdatedAt: contacts[i].UpdatedAt.String(),
-		}
-	}
-
 	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(users)
+	res, _ := json.Marshal(contacts)
 	w.Write(res)
 }
 

@@ -24,7 +24,7 @@ type Server struct {
 func Setup() types.IServer {
 	dbConn, err := db.ConnectDB(os.Getenv("MONGO_INITDB_DATABASE"))
 	if err != nil {
-		slog.Error("failed to connect MongoDB")
+		slog.Error("failed to connect MongoDB", slog.Any("error", err.Error()))
 		os.Exit(1)
 	}
 
@@ -79,7 +79,10 @@ func init() {
 	slog.Info(".env file is loaded")
 
 	// load jwt secret & expr
-	jwthelper.InitJwtData()
+	if !jwthelper.InitJwtData() {
+		slog.Error("cannot load jwt data")
+		os.Exit(1)
+	}
 }
 
 func getEnvFilePath() string {

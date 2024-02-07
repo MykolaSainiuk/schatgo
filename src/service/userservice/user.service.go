@@ -19,11 +19,11 @@ func NewUserService(srv types.IServer) *UserService {
 	}
 }
 
-func (service *UserService) GetUserById(ctx context.Context, userID string) (*model.User, error) {
+func (service *UserService) GetUserByID(ctx context.Context, userID string) (*model.User, error) {
 	return service.userRepo.GetUserByID(ctx, userID)
 }
 
-func (service *UserService) GetUser(ctx context.Context, userID string) (*model.UserPopulated, error) {
+func (service *UserService) GetUserInfo(ctx context.Context, userID string) (*model.UserPopulated, error) {
 	return service.userRepo.GetUserByIdPopulated(ctx, userID)
 }
 

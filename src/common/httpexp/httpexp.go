@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"sync"
 )
 
 // InvalidResponseDto
@@ -18,7 +20,15 @@ type HttpExp struct {
 	Details       []string `json:"details,omitempty"`
 }
 
+var (
+	isProdOnce sync.Once
+	isProd     = true
+)
+
 func From(err error, msg string, code int, details ...string) *HttpExp {
+	isProdOnce.Do(func() {
+		isProd = os.Getenv("NODE_ENV") == "production"
+	})
 	return &HttpExp{
 		Error:         err,
 		StatusCode:    code,
@@ -39,13 +49,15 @@ func (e *HttpExp) Reply(w http.ResponseWriter) {
 		return
 	}
 
-	logStr := ""
-	if e.Details != nil {
-		logStr = fmt.Sprintf("Msg: %s; Status: %d; Error:\n%+v\nDetails:%v", e.PublicMessage, e.StatusCode, e.Error, e.Details)
-	} else {
-		logStr = fmt.Sprintf("Msg: %s; Status: %d; Error:\n%+v", e.PublicMessage, e.StatusCode, e.Error)
+	if !isProd {
+		logStr := ""
+		if e.Details == nil {
+			logStr = fmt.Sprintf("Msg: %s; Status: %d; Error:\n%+v", e.PublicMessage, e.StatusCode, e.Error)
+		} else {
+			logStr = fmt.Sprintf("Msg: %s; Status: %d; Error:\n%+v\nDetails:%+v", e.PublicMessage, e.StatusCode, e.Error, e.Details)
+		}
+		slog.Debug(logStr)
 	}
-	slog.Debug(logStr)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(e.StatusCode)

@@ -73,7 +73,6 @@ func (handler *MessageHandler) NewMessage(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusCreated)
 	res, _ := json.Marshal(dto.NewMessageOutputDto{Id: newMessageID.Hex()})
 	w.Write(res)
-
 }
 
 // ListAllMessages method
@@ -85,7 +84,6 @@ func (handler *MessageHandler) NewMessage(w http.ResponseWriter, r *http.Request
 //	@Produce		json
 //	@Param        	chatId   path      	string  			true	"Chat ID"
 //	@Success		200		{array}		dto.MessageOutputDto
-//	@Failure		404		{object}	httpexp.HttpExp				"Not found chat"
 //	@Router			/api/message/{chatId}/list/all [get]
 func (handler *MessageHandler) ListAllMessages(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -107,7 +105,6 @@ func (handler *MessageHandler) ListAllMessages(w http.ResponseWriter, r *http.Re
 //	@Param			limit	path		string	false	"page size"
 //	@Produce		json
 //	@Success		200		{array}		dto.MessageOutputDto
-//	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
 //	@Router			/api/message/{chatId}/list [get]
 func (handler *MessageHandler) ListMessagesPaginated(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

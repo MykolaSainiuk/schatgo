@@ -34,7 +34,7 @@ func (service *ChatService) CreateChat(ctx context.Context, userId string, data 
 	anotherUser, err := service.userService.GetUserByName(ctx, data.UserName)
 	if err != nil || anotherUser == nil {
 		slog.Info("no such user found by name")
-		return nil, cmnerr.ErrNotFoundEntity
+		return nil, err
 	}
 
 	_userId, _ := primitive.ObjectIDFromHex(userId)
@@ -83,13 +83,12 @@ func (service *ChatService) CreateChat(ctx context.Context, userId string, data 
 
 	newChat, err := service.chatRepo.SaveChat(ctx, newUserItem)
 	if err != nil {
-		slog.Info("error saving chat")
 		return nil, err
 	}
 
-	err2 := service.userService.RegisterNewChat(ctx, newChat.ID, userId, anotherUser.ID.Hex())
+	err = service.userService.RegisterNewChat(ctx, newChat.ID, userId, anotherUser.ID.Hex())
 
-	return newChat, errors.Join(err, err2)
+	return newChat, err
 }
 
 func (service *ChatService) GetAllChats(ctx context.Context, userID string) ([]model.ChatPopulated, error) {
@@ -100,7 +99,7 @@ func (service *ChatService) GetChatsPaginated(ctx context.Context, userID string
 	return service.chatRepo.GetChatsByUserID(ctx, userID, pgParams)
 }
 
-func (service *ChatService) GetChatById(ctx context.Context, chatID primitive.ObjectID) (*model.Chat, error) {
+func (service *ChatService) GetChatByID(ctx context.Context, chatID primitive.ObjectID) (*model.Chat, error) {
 	return service.chatRepo.GetChatByID(ctx, chatID)
 }
 

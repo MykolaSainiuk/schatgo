@@ -3,6 +3,7 @@ package userrepo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -42,8 +43,7 @@ func (repo *UserRepo) SaveUser(ctx context.Context, newUser *model.User) (string
 		return "", errors.Join(cmnerr.ErrUniqueViolation, err)
 	}
 
-	slog.Error("cannot save user into users collection", slog.String("error", errText))
-	return "", err
+	return "", fmt.Errorf("cannot save user into users collection: %w", err)
 }
 
 func (repo *UserRepo) GetUserByID(ctx context.Context, id string) (*model.User, error) {
@@ -52,11 +52,10 @@ func (repo *UserRepo) GetUserByID(ctx context.Context, id string) (*model.User, 
 	var user *model.User
 	var err error
 	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}).Decode(&user); err != nil || user == nil {
-		slog.Error("cannot retrieve user from users collection", slog.Any("error", err.Error()))
 		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
-		return nil, err
+		return nil, fmt.Errorf("cannot retrieve user from users collection: %w", err)
 	}
 
 	return user, err
@@ -88,21 +87,18 @@ func (repo *UserRepo) GetUserByIdPopulated(ctx context.Context, id string) (*mod
 	var users []any
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot aggregate users collection: %w", err)
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &users); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot decode users from cursor: %w", err)
 	}
 	if len(users) == 0 {
 		return nil, cmnerr.ErrNotFoundEntity
 	}
 
-	d, ok := users[0].(primitive.D)
-	if !ok {
-		return nil, errors.New("cannot cast user to UserPopulated")
-	}
+	d, _ := users[0].(primitive.D)
 	user := d.Map()
 
 	contacts := []*model.User{}
@@ -132,15 +128,13 @@ func (repo *UserRepo) GetUsers(ctx context.Context, page int, limit int) (*[]mod
 
 	cursor, err := repo.collection.Find(ctx, bson.D{}, opts)
 	if err != nil || cursor == nil {
-		slog.Error("cannot retrieve users from collection", slog.Any("error", err.Error()))
-		return nil, err
+		return nil, fmt.Errorf("cannot retrieve users from collection: %w", err)
 	}
 	defer cursor.Close(ctx)
 
 	users := make([]model.User, limit)
 	if err = cursor.All(ctx, &users); err != nil {
-		slog.Error("cannot cast collection from cursor to slice", slog.Any("error", err.Error()))
-		return nil, err
+		return nil, fmt.Errorf("cannot decode users from cursor: %w", err)
 	}
 
 	return &users, nil
@@ -152,8 +146,7 @@ func (repo *UserRepo) GetUserByName(ctx context.Context, name string) (*model.Us
 		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
-		slog.Error("cannot retrieve user by name", slog.Any("error", err.Error()))
-		return nil, err
+		return nil, fmt.Errorf("cannot retrieve user from users collection: %w", err)
 	}
 
 	return user, nil
@@ -189,8 +182,7 @@ func (repo *UserRepo) UpdateUser(ctx context.Context, id primitive.ObjectID, key
 
 func handleUpdateError(err error, matchedCount int64, id string) error {
 	if err != nil {
-		slog.Error("cannot update user of users collection", slog.Any("error", err.Error()))
-		return err
+		return fmt.Errorf("cannot update user of users collection: %w", err)
 	}
 	if matchedCount == 0 {
 		return errors.Join(cmnerr.ErrNotFoundEntity, err)
@@ -203,8 +195,7 @@ func handleUpdateError(err error, matchedCount int64, id string) error {
 func (repo *UserRepo) DeleteUser(ctx context.Context, id string) error {
 	r, err := repo.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}})
 	if err != nil {
-		slog.Error("cannot delete user from users collection", slog.Any("error", err.Error()))
-		return err
+		return fmt.Errorf("cannot delete user from users collection: %w", err)
 	}
 	if r.DeletedCount == 0 {
 		return errors.Join(cmnerr.ErrNotFoundEntity, err)
@@ -243,12 +234,12 @@ func (repo *UserRepo) GetUserContactsByID(ctx context.Context, id string, params
 	var contacts []model.User
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot aggregate contacts collection: %w", err)
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &contacts); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot decode contacts from cursor: %w", err)
 	}
 
 	return contacts, err

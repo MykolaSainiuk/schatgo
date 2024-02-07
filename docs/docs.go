@@ -56,12 +56,6 @@ const docTemplate = `{
                                 "$ref": "#/definitions/dto.ChatOutputDto"
                             }
                         }
-                    },
-                    "404": {
-                        "description": "Not found user",
-                        "schema": {
-                            "$ref": "#/definitions/httpexp.HttpExp"
-                        }
                     }
                 }
             }
@@ -89,12 +83,6 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/dto.ChatOutputDto"
                             }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found user",
-                        "schema": {
-                            "$ref": "#/definitions/httpexp.HttpExp"
                         }
                     }
                 }
@@ -142,6 +130,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/chat/{chatId}/clear": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete all messages from chat",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Clear chat",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/api/message/{chatId}/list": {
             "get": {
                 "security": [
@@ -184,14 +194,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.ChatOutputDto"
+                                "$ref": "#/definitions/dto.MessageOutputDto"
                             }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found user",
-                        "schema": {
-                            "$ref": "#/definitions/httpexp.HttpExp"
                         }
                     }
                 }
@@ -229,12 +233,6 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/dto.MessageOutputDto"
                             }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found chat",
-                        "schema": {
-                            "$ref": "#/definitions/httpexp.HttpExp"
                         }
                     }
                 }

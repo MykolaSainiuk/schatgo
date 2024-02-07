@@ -3,6 +3,7 @@ package chatrepo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,7 +19,6 @@ import (
 type ChatRepo struct {
 	name       string
 	collection *mongo.Collection
-	// db         types.IDatabase
 }
 
 func NewChatRepo(db types.IDatabase) *ChatRepo {
@@ -26,13 +26,8 @@ func NewChatRepo(db types.IDatabase) *ChatRepo {
 	return &ChatRepo{
 		name:       "chats",
 		collection: db.GetCollection(name),
-		// db:         db,
 	}
 }
-
-// func (repo *ChatRepo) GetDB() types.IDatabase {
-// 	return repo.db
-// }
 
 func (repo *ChatRepo) GetExistingChat(ctx context.Context, userId primitive.ObjectID, anotherUserId primitive.ObjectID) (*model.Chat, error) {
 	var chat *model.Chat
@@ -46,8 +41,9 @@ func (repo *ChatRepo) GetExistingChat(ctx context.Context, userId primitive.Obje
 		if errors.Is(err, mongo.ErrNoDocuments) || chat == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
-		return nil, err
+		return nil, fmt.Errorf("cannot retrieve chat from chats collection: %w", err)
 	}
+
 	return chat, nil
 }
 
@@ -57,7 +53,8 @@ func (repo *ChatRepo) SaveChat(ctx context.Context, data *model.Chat) (*model.Ch
 		slog.Debug("saved chat", slog.String("ID", r.InsertedID.(primitive.ObjectID).String()))
 		return repo.GetChatByID(ctx, r.InsertedID.(primitive.ObjectID))
 	}
-	return nil, err
+
+	return nil, fmt.Errorf("cannot save chat into chats collection: %w", err)
 }
 
 func (repo *ChatRepo) GetChatByID(ctx context.Context, id primitive.ObjectID) (*model.Chat, error) {
@@ -66,8 +63,9 @@ func (repo *ChatRepo) GetChatByID(ctx context.Context, id primitive.ObjectID) (*
 		if errors.Is(err, mongo.ErrNoDocuments) || chat == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
-		return nil, err
+		return nil, fmt.Errorf("cannot retrieve chat from chats collection: %w", err)
 	}
+
 	return chat, nil
 }
 
@@ -111,12 +109,12 @@ func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ..
 	var chats []any
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot aggregate from chats collection: %w", err)
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &chats); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot decode chats from cursor: %w", err)
 	}
 
 	if len(chats) == 0 {
@@ -157,8 +155,7 @@ func (repo *ChatRepo) SetLastMessage(ctx context.Context, chatID, messageID prim
 		Value: primitive.D{{Key: "lastMessage", Value: messageID}},
 	}})
 	if err != nil {
-		slog.Error("cannot update chat of chats collection", slog.Any("error", err.Error()))
-		return err
+		return fmt.Errorf("cannot update chat of chats collection: %w", err)
 	}
 	if r.MatchedCount == 0 {
 		return errors.Join(cmnerr.ErrNotFoundEntity, err)

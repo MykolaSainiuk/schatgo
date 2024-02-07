@@ -51,17 +51,15 @@ func (service *AuthService) RegisterNewUser(ctx context.Context, dto *dto.Regist
 	}
 
 	newUserId, err := service.userRepo.SaveUser(ctx, newUser)
-	if err != nil {
-		return "", err
-	}
-	return newUserId, nil
+
+	return newUserId, err
 }
 
 func (service *AuthService) LoginUser(ctx context.Context, name string, rawPassword string) (string, error) {
 	user, err := service.userRepo.GetUserByName(ctx, name)
 	if err != nil {
 		slog.Info("no such user found by name")
-		return "", cmnerr.ErrNotFoundEntity
+		return "", err
 	}
 
 	if !pwdhelper.CheckPasswordHash(rawPassword, user.Hash) {
@@ -77,7 +75,6 @@ func (service *AuthService) LoginUser(ctx context.Context, name string, rawPassw
 
 	err = service.tokenRepo.DeleteUserAccessTokens(ctx, user.ID)
 	if err != nil {
-		slog.Error("failed to delete user tokens", slog.Any("error", err))
 		return "", err
 	}
 	_, err = service.tokenRepo.SaveToken(ctx, &model.Token{
@@ -86,10 +83,6 @@ func (service *AuthService) LoginUser(ctx context.Context, name string, rawPassw
 		Type:     model.TokenTypeAccess,
 		Encoded:  accessToken,
 	})
-	if err != nil {
-		slog.Error("failed to save token", slog.Any("error", err))
-		return "", err
-	}
 
-	return accessToken, nil
+	return accessToken, err
 }

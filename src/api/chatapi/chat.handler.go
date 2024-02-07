@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
@@ -15,15 +17,18 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
 	"github.com/MykolaSainiuk/schatgo/src/service/chatservice"
+	"github.com/MykolaSainiuk/schatgo/src/service/messageservice"
 )
 
 type ChatHandler struct {
-	ChatService *chatservice.ChatService
+	ChatService    *chatservice.ChatService
+	MessageService *messageservice.MessageService
 }
 
 func NewChatHandler(srv types.IServer) *ChatHandler {
 	chatService := chatservice.NewChatService(srv)
-	return &ChatHandler{chatService}
+	messageService := messageservice.NewMessageService(srv)
+	return &ChatHandler{chatService, messageService}
 }
 
 // NewChat method
@@ -79,7 +84,6 @@ func (handler *ChatHandler) NewChat(w http.ResponseWriter, r *http.Request) {
 //	@Security		BearerAuth
 //	@Produce		json
 //	@Success		200		{array}		dto.ChatOutputDto
-//	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
 //	@Router			/api/chat/list/all [get]
 func (handler *ChatHandler) ListAllChats(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -100,7 +104,6 @@ func (handler *ChatHandler) ListAllChats(w http.ResponseWriter, r *http.Request)
 //	@Param			limit	path	string					false	"page size"
 //	@Produce		json
 //	@Success		200		{array}		dto.ChatOutputDto
-//	@Failure		404		{object}	httpexp.HttpExp	"Not found user"
 //	@Router			/api/chat/list [get]
 func (handler *ChatHandler) ListChatsPaginated(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -125,29 +128,41 @@ func (handler *ChatHandler) ListChatsPaginated(w http.ResponseWriter, r *http.Re
 
 func renderChats(w http.ResponseWriter, chats []model.ChatPopulated, err error) {
 	if err != nil {
-		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
-			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)
-			return
-		}
 		cmnerr.Reply500(w, err)
 		return
 	}
 
-	// resChats := make([]dto.ChatOutputDto, len(chats))
-	// for i := range chats {
-	// 	resChats[i] = dto.ChatOutputDto{
-	// 		ID:      chats[i].ID.Hex(),
-	// 		Name:    chats[i].Name,
-	// 		IconUri: chats[i].IconUri,
-	// 		Muted:   chats[i].Muted,
-	// 		Users:   chats[i].Users,
-	// 		LastMessage: chats[i].LastMessage.Hex(),
-	// 	}
-	// }
-
 	w.WriteHeader(http.StatusOK)
 	res, _ := json.Marshal(chats)
 	w.Write(res)
+}
+
+// ClearChat method
+//
+//	@Summary		Clear chat
+//	@Description	Delete all messages from chat
+//	@Tags			chat
+//	@Security		BearerAuth
+//	@Accept			json
+//	@Success		204
+//	@Router			/api/chat/{chatId}/clear [delete]
+func (handler *ChatHandler) ClearChat(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	chatId := chi.URLParam(r, "chatId")
+
+	if err := handler.MessageService.ClearChatMessages(ctx, chatId); err != nil {
+		cmnerr.Reply500(w, err)
+		return
+	}
+
+	_chatId, _ := primitive.ObjectIDFromHex(chatId)
+	if err := handler.ChatService.SetLastMessage(ctx, _chatId, primitive.NilObjectID); err != nil {
+		cmnerr.Reply500(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	w.Write(nil)
 }
 
 const (

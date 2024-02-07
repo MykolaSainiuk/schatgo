@@ -34,7 +34,7 @@ func (handler *UserHandler) GetUserInfo(w http.ResponseWriter, r *http.Request) 
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
 
-	user, err := handler.UserService.GetUser(ctx, userID)
+	user, err := handler.UserService.GetUserInfo(ctx, userID)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
 			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)

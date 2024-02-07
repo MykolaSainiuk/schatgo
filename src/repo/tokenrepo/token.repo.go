@@ -3,6 +3,7 @@ package tokenrepo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -34,7 +35,10 @@ func (repo *TokenRepo) DeleteUserAccessTokens(ctx context.Context, userId primit
 		"userId": userId,
 		"type":   model.TokenTypeAccess,
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("cannot delete user tokens: %w", err)
+	}
+	return nil
 }
 
 func (repo *TokenRepo) SaveToken(ctx context.Context, newToken *model.Token) (string, error) {
@@ -49,23 +53,20 @@ func (repo *TokenRepo) SaveToken(ctx context.Context, newToken *model.Token) (st
 		return "", errors.Join(cmnerr.ErrUniqueViolation, err)
 	}
 
-	slog.Error("cannot save token into tokens collection", slog.String("error", errText))
-	return "", err
+	return "", fmt.Errorf("cannot save token into tokens collection: %w", err)
 }
 
 func (repo *TokenRepo) ExistToken(ctx context.Context, encoded *string) (bool, error) {
-	var token *model.Token
-	var err error
 	record := repo.collection.FindOne(ctx, bson.D{{Key: "encoded", Value: *encoded}}, options.FindOne().SetProjection(bson.D{
 		{Key: "_id", Value: 1},
 	}))
-	if err = record.Decode(&token); err != nil || token == nil {
-		slog.Error("cannot retrieve token from tokens collection", slog.Any("error", err.Error()))
+	var token *model.Token
+	if err := record.Decode(&token); err != nil || token == nil {
 		if errors.Is(err, mongo.ErrNoDocuments) || token == nil {
 			return false, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
-		return false, err
+		return false, fmt.Errorf("cannot retrieve token from tokens collection: %w", err)
 	}
 
-	return token != nil, err
+	return token != nil, nil
 }
