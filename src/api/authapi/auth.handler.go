@@ -1,6 +1,7 @@
 package authapi
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -47,6 +48,10 @@ func (handler *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request)
 	if err := validate.Struct(&body); err != nil {
 		validationErrs := cmnerr.GetValidationErrors(err)
 		httpexp.From(err, MsgInvalidRegisterInput, http.StatusUnprocessableEntity, validationErrs...).Reply(w)
+		return
+	}
+	if bytes.Count([]byte(body.AvatarUri), nil) > 2047 {
+		httpexp.From(errors.New("avatarUri is too long"), MsgInvalidRegisterInput, http.StatusUnprocessableEntity).Reply(w)
 		return
 	}
 

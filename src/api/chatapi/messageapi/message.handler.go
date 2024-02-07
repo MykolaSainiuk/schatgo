@@ -83,7 +83,7 @@ func (handler *MessageHandler) NewMessage(w http.ResponseWriter, r *http.Request
 //	@Security		BearerAuth
 //	@Produce		json
 //	@Param        	chatId   path      	string  			true	"Chat ID"
-//	@Success		200		{array}		dto.MessageOutputDto
+//	@Success		200		{array}		dto.MessageExtendedOutputDto
 //	@Router			/api/message/{chatId}/list/all [get]
 func (handler *MessageHandler) ListAllMessages(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -104,7 +104,7 @@ func (handler *MessageHandler) ListAllMessages(w http.ResponseWriter, r *http.Re
 //	@Param			page	path		string	false	"page number"
 //	@Param			limit	path		string	false	"page size"
 //	@Produce		json
-//	@Success		200		{array}		dto.MessageOutputDto
+//	@Success		200		{array}		dto.MessageExtendedOutputDto
 //	@Router			/api/message/{chatId}/list [get]
 func (handler *MessageHandler) ListMessagesPaginated(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -127,7 +127,7 @@ func (handler *MessageHandler) ListMessagesPaginated(w http.ResponseWriter, r *h
 	renderChats(w, messages, err)
 }
 
-func renderChats(w http.ResponseWriter, messages []model.Message, err error) {
+func renderChats(w http.ResponseWriter, messages []model.MessagePopulated, err error) {
 	if err != nil {
 		cmnerr.Reply500(w, err)
 		return

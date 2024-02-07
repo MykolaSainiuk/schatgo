@@ -259,3 +259,23 @@ func (repo *UserRepo) AddChatIdToUsers(ctx context.Context, chatId primitive.Obj
 
 	return handleUpdateError(err, r.MatchedCount, id2)
 }
+
+func (repo *UserRepo) GetAllUsers(ctx context.Context, userID string) ([]model.User, error) {
+	_userId, _ := primitive.ObjectIDFromHex(userID)
+
+	cursor, err := repo.collection.Find(ctx, bson.D{{
+		Key:   "_id",
+		Value: bson.D{{Key: "$ne", Value: _userId}},
+	}})
+	if err != nil || cursor == nil {
+		return nil, fmt.Errorf("cannot retrieve users from collection: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	var users []model.User
+	if err = cursor.All(ctx, &users); err != nil {
+		return nil, fmt.Errorf("cannot decode users from cursor: %w", err)
+	}
+
+	return users, nil
+}

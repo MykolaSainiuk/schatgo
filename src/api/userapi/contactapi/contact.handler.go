@@ -72,8 +72,8 @@ func (handler *ContactHandler) AddContact(w http.ResponseWriter, r *http.Request
 
 // ListAllContacts method
 //
-//	@Summary		List all contacts
-//	@Description	Unpaginated list of all contacts of User
+//	@Summary		List all potential contacts
+//	@Description	Unpaginated list of all potential contacts of User
 //	@Tags			contact
 //	@Security		BearerAuth
 //	@Produce		json
@@ -84,7 +84,7 @@ func (handler *ContactHandler) ListAllContacts(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
 
-	contacts, err := handler.UserService.GetAllContacts(ctx, userID)
+	contacts, err := handler.UserService.GetAllUsers(ctx, userID)
 
 	renderContacts(w, contacts, err)
 }

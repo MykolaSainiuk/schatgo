@@ -11,6 +11,7 @@ import (
 
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
+	"github.com/MykolaSainiuk/schatgo/src/repo/repohelper"
 )
 
 type MessageRepo struct {
@@ -36,14 +37,25 @@ func (repo *MessageRepo) SaveMessage(ctx context.Context, newToken *model.Messag
 	return primitive.NilObjectID, fmt.Errorf("cannot save message into messages collection: %w", err)
 }
 
-func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, params ...any) ([]model.Message, error) {
+func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, params ...any) ([]model.MessagePopulated, error) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 
 	match := bson.D{{Key: "$match", Value: bson.D{{
 		Key: "chat", Value: _id,
 	}}}}
-
 	pipelineStages := mongo.Pipeline{match}
+
+	ls1 := bson.D{
+		{Key: "from", Value: "users"},
+		{Key: "localField", Value: "user"},
+		{Key: "foreignField", Value: "_id"},
+		{Key: "as", Value: "user"},
+	}
+	lookup1 := bson.D{{Key: "$lookup", Value: ls1}}
+	unwind1 := bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$user"}}}}
+	sort := bson.D{{Key: "$sort", Value: bson.D{{Key: "createdAt", Value: -1}}}}
+
+	pipelineStages = append(pipelineStages, lookup1, unwind1, sort)
 
 	pgParam := params[0].(types.PaginationParams)
 	if pgParam.Limit != 0 {
@@ -55,7 +67,7 @@ func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, par
 		pipelineStages = append(pipelineStages, skip)
 	}
 
-	var messages []model.Message
+	var messages []any
 	cursor, err := repo.collection.Aggregate(ctx, pipelineStages)
 	if err != nil {
 		return nil, fmt.Errorf("cannot aggregate from messages collection: %w", err)
@@ -67,9 +79,23 @@ func (repo *MessageRepo) GetMessagesByChatID(ctx context.Context, id string, par
 	}
 
 	if len(messages) == 0 {
-		return make([]model.Message, 0), nil
+		return make([]model.MessagePopulated, 0), nil
 	}
-	return messages, nil
+
+	messagesPopulated := make([]model.MessagePopulated, 0, len(messages))
+	for i := range messages {
+		d, _ := messages[i].(primitive.D)
+		msg := d.Map()
+
+		rawUser := msg["user"]
+
+		messagesPopulated = append(messagesPopulated, model.MessagePopulated{
+			Message: repohelper.RawDocToMessageModel(msg),
+			User:    repohelper.RawDocToUserModel(rawUser.(primitive.D).Map()),
+		})
+	}
+
+	return messagesPopulated, nil
 }
 
 func (repo *MessageRepo) RemoveAllMessagesByChatID(ctx context.Context, id string) error {

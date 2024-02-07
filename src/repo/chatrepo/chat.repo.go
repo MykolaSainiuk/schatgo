@@ -123,10 +123,7 @@ func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ..
 
 	chatsPopulated := make([]model.ChatPopulated, 0, len(chats))
 	for i := range chats {
-		d, ok := chats[i].(primitive.D)
-		if !ok {
-			return nil, errors.New("cannot cast user to ChatPopulated")
-		}
+		d, _ := chats[i].(primitive.D)
 		chat := d.Map()
 
 		users := []*model.User{}

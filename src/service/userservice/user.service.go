@@ -35,6 +35,10 @@ func (service *UserService) AddContact(ctx context.Context, userID string, conta
 	return service.userRepo.AddContact(ctx, userID, contactName)
 }
 
+func (service *UserService) GetAllUsers(ctx context.Context, userID string) ([]model.User, error) {
+	return service.userRepo.GetAllUsers(ctx, userID)
+}
+
 func (service *UserService) GetAllContacts(ctx context.Context, userID string) ([]model.User, error) {
 	return service.userRepo.GetUserContactsByID(ctx, userID, types.PaginationParams{})
 }

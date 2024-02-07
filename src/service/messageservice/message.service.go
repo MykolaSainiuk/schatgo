@@ -60,11 +60,11 @@ func (service *MessageService) NewMessage(ctx context.Context, chatId string, us
 	return newMessageId, err
 }
 
-func (service *MessageService) GetAllMessages(ctx context.Context, chatID string) ([]model.Message, error) {
+func (service *MessageService) GetAllMessages(ctx context.Context, chatID string) ([]model.MessagePopulated, error) {
 	return service.messageRepo.GetMessagesByChatID(ctx, chatID, types.PaginationParams{})
 }
 
-func (service *MessageService) GetMessagesPaginated(ctx context.Context, chatID string, pgParams types.PaginationParams) ([]model.Message, error) {
+func (service *MessageService) GetMessagesPaginated(ctx context.Context, chatID string, pgParams types.PaginationParams) ([]model.MessagePopulated, error) {
 	return service.messageRepo.GetMessagesByChatID(ctx, chatID, pgParams)
 }
 

@@ -21,3 +21,9 @@ type Message struct {
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
+
+type MessagePopulated struct {
+	*Message
+
+	User *User `json:"user" bson:"user"`
+}

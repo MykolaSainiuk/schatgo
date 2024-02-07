@@ -114,3 +114,17 @@ type MessageOutputDto struct {
 	CreatedAt string             `json:"createdAt"`
 	UpdatedAt string             `json:"updatedAt"`
 }
+
+// MessageExtendedOutputDto
+type MessageExtendedOutputDto struct {
+	ID        string             `json:"_id"`
+	Text      string             `json:"text"`
+	Image     string             `json:"image"`
+	Sent      bool               `json:"sent"`
+	Received  bool               `json:"received"`
+	System    bool               `json:"system"`
+	User      *UserInfoOutputDto `json:"user"`
+	Chat      primitive.ObjectID `json:"chat"`
+	CreatedAt string             `json:"createdAt"`
+	UpdatedAt string             `json:"updatedAt"`
+}

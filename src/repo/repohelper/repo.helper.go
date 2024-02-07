@@ -128,3 +128,31 @@ func RawPlainDocToMessageModel(rawDoc map[string]any) *model.Message {
 		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
 	}
 }
+
+
+func RawDocToMessageModel(rawDoc map[string]any) *model.Message {
+	if len(rawDoc) == 0 {
+		return nil
+	}
+	
+	image, ok := rawDoc["image"].(string)
+	if !ok {
+		image = ""
+	}
+
+	return &model.Message{
+		ID:    rawDoc["_id"].(primitive.ObjectID),
+		Text:  rawDoc["text"].(string),
+		Image: image,
+
+		Sent:     rawDoc["sent"].(bool),
+		Received: rawDoc["received"].(bool),
+		System:   rawDoc["system"].(bool),
+
+		User: primitive.NilObjectID,
+		Chat: rawDoc["chat"].(primitive.ObjectID),
+
+		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
+	}
+}
