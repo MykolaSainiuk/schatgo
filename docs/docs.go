@@ -194,7 +194,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.MessageOutputDto"
+                                "$ref": "#/definitions/dto.MessageExtendedOutputDto"
                             }
                         }
                     }
@@ -231,7 +231,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.MessageOutputDto"
+                                "$ref": "#/definitions/dto.MessageExtendedOutputDto"
                             }
                         }
                     }
@@ -387,14 +387,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Unpaginated list of all contacts of User",
+                "description": "Unpaginated list of all potential contacts of User",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "contact"
                 ],
-                "summary": "List all contacts",
+                "summary": "List all potential contacts",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -434,6 +434,86 @@ const docTemplate = `{
                         "description": "User object extended",
                         "schema": {
                             "$ref": "#/definitions/dto.UserInfoExtendedOutputDto"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found user",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/pre-keys": {
+            "post": {
+                "description": "Publish signed pre keys",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Publish keys",
+                "parameters": [
+                    {
+                        "description": "Public pre keys",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PublishKeysDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PublishKeysDto"
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/httpexp.HttpExp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/pre-keys/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Return User public signed pre-keys",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Fetch user public keys",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Public pre-keys",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PublishKeysDto"
                         }
                     },
                     "404": {
@@ -611,7 +691,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.MessageOutputDto": {
+        "dto.MessageExtendedOutputDto": {
             "type": "object",
             "properties": {
                 "_id": {
@@ -621,6 +701,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "createdAt": {
+                    "type": "string"
+                },
+                "encodedText": {
                     "type": "string"
                 },
                 "image": {
@@ -642,16 +725,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "type": "string"
+                    "$ref": "#/definitions/dto.UserInfoOutputDto"
                 }
             }
         },
         "dto.NewMessageInputDto": {
             "type": "object",
             "required": [
+                "encodedText",
                 "text"
             ],
             "properties": {
+                "encodedText": {
+                    "type": "string",
+                    "minLength": 1
+                },
                 "image": {
                     "type": "string"
                 },
@@ -669,11 +757,59 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.OneTimePreKeyItem": {
+            "type": "object",
+            "required": [
+                "keyId",
+                "publicKey"
+            ],
+            "properties": {
+                "keyId": {
+                    "type": "integer"
+                },
+                "publicKey": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.PublishKeysDto": {
+            "type": "object",
+            "required": [
+                "identityPubKey",
+                "oneTimePreKeys",
+                "registrationId",
+                "signedPreKey"
+            ],
+            "properties": {
+                "identityPubKey": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "oneTimePreKeys": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OneTimePreKeyItem"
+                    }
+                },
+                "registrationId": {
+                    "type": "integer"
+                },
+                "signedPreKey": {
+                    "$ref": "#/definitions/dto.SignedPreKey"
+                }
+            }
+        },
         "dto.RegisterInputDto": {
             "type": "object",
             "required": [
                 "name",
-                "password"
+                "password",
+                "spAddress"
             ],
             "properties": {
                 "avatarUri": {
@@ -686,6 +822,10 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 6
+                },
+                "spAddress": {
+                    "type": "string",
+                    "minLength": 2
                 }
             }
         },
@@ -694,6 +834,31 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.SignedPreKey": {
+            "type": "object",
+            "required": [
+                "keyId",
+                "publicKey",
+                "signature"
+            ],
+            "properties": {
+                "keyId": {
+                    "type": "integer"
+                },
+                "publicKey": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "signature": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

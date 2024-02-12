@@ -56,13 +56,15 @@ definitions:
       token:
         type: string
     type: object
-  dto.MessageOutputDto:
+  dto.MessageExtendedOutputDto:
     properties:
       _id:
         type: string
       chat:
         type: string
       createdAt:
+        type: string
+      encodedText:
         type: string
       image:
         type: string
@@ -77,22 +79,58 @@ definitions:
       updatedAt:
         type: string
       user:
-        type: string
+        $ref: '#/definitions/dto.UserInfoOutputDto'
     type: object
   dto.NewMessageInputDto:
     properties:
+      encodedText:
+        minLength: 1
+        type: string
       image:
         type: string
       text:
         minLength: 1
         type: string
     required:
+    - encodedText
     - text
     type: object
   dto.NewMessageOutputDto:
     properties:
       id:
         type: string
+    type: object
+  dto.OneTimePreKeyItem:
+    properties:
+      keyId:
+        type: integer
+      publicKey:
+        items:
+          type: integer
+        type: array
+    required:
+    - keyId
+    - publicKey
+    type: object
+  dto.PublishKeysDto:
+    properties:
+      identityPubKey:
+        items:
+          type: integer
+        type: array
+      oneTimePreKeys:
+        items:
+          $ref: '#/definitions/dto.OneTimePreKeyItem'
+        type: array
+      registrationId:
+        type: integer
+      signedPreKey:
+        $ref: '#/definitions/dto.SignedPreKey'
+    required:
+    - identityPubKey
+    - oneTimePreKeys
+    - registrationId
+    - signedPreKey
     type: object
   dto.RegisterInputDto:
     properties:
@@ -104,14 +142,35 @@ definitions:
       password:
         minLength: 6
         type: string
+      spAddress:
+        minLength: 2
+        type: string
     required:
     - name
     - password
+    - spAddress
     type: object
   dto.RegisterOutputDto:
     properties:
       id:
         type: string
+    type: object
+  dto.SignedPreKey:
+    properties:
+      keyId:
+        type: integer
+      publicKey:
+        items:
+          type: integer
+        type: array
+      signature:
+        items:
+          type: integer
+        type: array
+    required:
+    - keyId
+    - publicKey
+    - signature
     type: object
   dto.UserInfoExtendedOutputDto:
     properties:
@@ -280,7 +339,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.MessageOutputDto'
+              $ref: '#/definitions/dto.MessageExtendedOutputDto'
             type: array
       security:
       - BearerAuth: []
@@ -303,7 +362,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.MessageOutputDto'
+              $ref: '#/definitions/dto.MessageExtendedOutputDto'
             type: array
       security:
       - BearerAuth: []
@@ -401,7 +460,7 @@ paths:
       - contact
   /api/user/contact/list/all:
     get:
-      description: Unpaginated list of all contacts of User
+      description: Unpaginated list of all potential contacts of User
       produces:
       - application/json
       responses:
@@ -417,7 +476,7 @@ paths:
             $ref: '#/definitions/httpexp.HttpExp'
       security:
       - BearerAuth: []
-      summary: List all contacts
+      summary: List all potential contacts
       tags:
       - contact
   /api/user/me:
@@ -437,6 +496,57 @@ paths:
       security:
       - BearerAuth: []
       summary: Get user info
+      tags:
+      - user
+  /api/user/pre-keys:
+    post:
+      consumes:
+      - application/json
+      description: Publish signed pre keys
+      parameters:
+      - description: Public pre keys
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PublishKeysDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ok
+          schema:
+            $ref: '#/definitions/dto.PublishKeysDto'
+        "422":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      summary: Publish keys
+      tags:
+      - user
+  /api/user/pre-keys/{userId}:
+    get:
+      description: Return User public signed pre-keys
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public pre-keys
+          schema:
+            $ref: '#/definitions/dto.PublishKeysDto'
+        "404":
+          description: Not found user
+          schema:
+            $ref: '#/definitions/httpexp.HttpExp'
+      security:
+      - BearerAuth: []
+      summary: Fetch user public keys
       tags:
       - user
   /auth/login:

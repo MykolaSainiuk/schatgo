@@ -75,6 +75,8 @@ func init() {
 	slog.Info("loading .env file", slog.String("path", envFilePath))
 	if err := godotenv.Load(envFilePath); err != nil {
 		slog.Error(".env file not found")
+		slog.Info("HOST=", os.Getenv("HOST"))
+		slog.Info("PORT=", os.Getenv("PORT"))
 		// os.Exit(1)
 	}
 	slog.Info(".env file is loaded")

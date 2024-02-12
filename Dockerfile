@@ -8,14 +8,11 @@ COPY go.sum ./
 # RUN go get ./...
 RUN go mod download
 
-COPY ./src ./src
-COPY ./main.go ./
-
-RUN go build -o ./bin
+COPY . .
 
 EXPOSE 8080
 
-RUN chmod +x /bin
+# RUN chmod +x /bin
 
-CMD [ "./bin" ]
-# CMD [ "go", "run", "main.go" ]
+# CMD [ "./bin" ]
+CMD [ "go", "run", "main.go" ]
