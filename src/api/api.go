@@ -35,6 +35,8 @@ func apiRouter(srv types.IServer) chi.Router {
 		r.Use(AuthOnly)
 		userHandler := userapi.NewUserHandler(srv)
 		r.Get("/user/me", userHandler.GetUserInfo)
+		r.Post("/user/pub-keys", userHandler.PublishSignedPreKeys)
+		r.Get("/user/pub-keys/{userId}", userHandler.FetchSignedPreKeys)
 	})
 
 	r.Group(func(r chi.Router) {

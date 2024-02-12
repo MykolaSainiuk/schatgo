@@ -20,7 +20,7 @@ import (
 )
 
 type MessageHandler struct {
-	MessageService *messageservice.MessageService
+	messageService *messageservice.MessageService
 }
 
 func NewMessageHandler(srv types.IServer) *MessageHandler {
@@ -60,7 +60,7 @@ func (handler *MessageHandler) NewMessage(w http.ResponseWriter, r *http.Request
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
 	chatId := chi.URLParam(r, "chatId")
 
-	newMessageID, err := handler.MessageService.NewMessage(ctx, chatId, userID, &body)
+	newMessageID, err := handler.messageService.NewMessage(ctx, chatId, userID, &body)
 	if err != nil || newMessageID == primitive.NilObjectID {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
 			httpexp.From(err, cmnerr.ErrNotFoundEntity.Error(), http.StatusNotFound).Reply(w)
@@ -89,7 +89,7 @@ func (handler *MessageHandler) ListAllMessages(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	chatId := chi.URLParam(r, "chatId")
 
-	messages, err := handler.MessageService.GetAllMessages(ctx, chatId)
+	messages, err := handler.messageService.GetAllMessages(ctx, chatId)
 
 	renderChats(w, messages, err)
 }
@@ -119,7 +119,7 @@ func (handler *MessageHandler) ListMessagesPaginated(w http.ResponseWriter, r *h
 		limit = 10
 	}
 
-	messages, err := handler.MessageService.GetMessagesPaginated(ctx, chatId, types.PaginationParams{
+	messages, err := handler.messageService.GetMessagesPaginated(ctx, chatId, types.PaginationParams{
 		Page:  int(page),
 		Limit: int(limit),
 	})

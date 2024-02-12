@@ -16,10 +16,10 @@ func RawDocToUserModel(rawDoc map[string]any) *model.User {
 		Name:      rawDoc["name"].(string),
 		AvatarUri: rawDoc["avatarUri"].(string),
 		Hash:      rawDoc["hash"].(string),
-
-		Contacts: contacts,
-		Chats:    chats,
-
+		SpAddress: rawDoc["spAddress"].(string),
+		// PublicSignedPreKey
+		Contacts:  contacts,
+		Chats:     chats,
 		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
 		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
 	}
@@ -61,16 +61,14 @@ func RawPlainDocToChatModel(rawDoc map[string]any) *model.Chat {
 	}
 
 	return &model.Chat{
-		ID:      rawDoc["_id"].(primitive.ObjectID),
-		Name:    name,
-		Muted:   rawDoc["muted"].(bool),
-		IconUri: iconUri,
-
+		ID:          rawDoc["_id"].(primitive.ObjectID),
+		Name:        name,
+		Muted:       rawDoc["muted"].(bool),
+		IconUri:     iconUri,
 		Users:       users,
 		LastMessage: lastMessage,
-
-		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
-		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
+		CreatedAt:   rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt:   rawDoc["updatedAt"].(primitive.DateTime).Time(),
 	}
 }
 
@@ -103,56 +101,55 @@ func RawDocToChatModel(rawDoc map[string]any) *model.Chat {
 }
 
 func RawPlainDocToMessageModel(rawDoc map[string]any) *model.Message {
-	if len(rawDoc) == 0 {
-		return nil
-	}
-	
 	image, ok := rawDoc["image"].(string)
 	if !ok {
 		image = ""
 	}
+	et, ok := rawDoc["encodedText"].(string)
+	if !ok {
+		et = ""
+	}
 
 	return &model.Message{
-		ID:    rawDoc["_id"].(primitive.ObjectID),
-		Text:  rawDoc["text"].(string),
-		Image: image,
-
-		Sent:     rawDoc["sent"].(bool),
-		Received: rawDoc["received"].(bool),
-		System:   rawDoc["system"].(bool),
-
-		User: rawDoc["user"].(primitive.ObjectID),
-		Chat: rawDoc["chat"].(primitive.ObjectID),
-
-		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
-		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
+		ID:          rawDoc["_id"].(primitive.ObjectID),
+		Text:        rawDoc["text"].(string),
+		EncodedText: et,
+		Image:       image,
+		Sent:        rawDoc["sent"].(bool),
+		Received:    rawDoc["received"].(bool),
+		System:      rawDoc["system"].(bool),
+		User:        rawDoc["user"].(primitive.ObjectID),
+		Chat:        rawDoc["chat"].(primitive.ObjectID),
+		CreatedAt:   rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt:   rawDoc["updatedAt"].(primitive.DateTime).Time(),
 	}
 }
-
 
 func RawDocToMessageModel(rawDoc map[string]any) *model.Message {
 	if len(rawDoc) == 0 {
 		return nil
 	}
-	
+
 	image, ok := rawDoc["image"].(string)
 	if !ok {
 		image = ""
 	}
+	et, ok := rawDoc["encodedText"].(string)
+	if !ok {
+		et = ""
+	}
 
 	return &model.Message{
-		ID:    rawDoc["_id"].(primitive.ObjectID),
-		Text:  rawDoc["text"].(string),
-		Image: image,
-
-		Sent:     rawDoc["sent"].(bool),
-		Received: rawDoc["received"].(bool),
-		System:   rawDoc["system"].(bool),
-
-		User: primitive.NilObjectID,
-		Chat: rawDoc["chat"].(primitive.ObjectID),
-
-		CreatedAt: rawDoc["createdAt"].(primitive.DateTime).Time(),
-		UpdatedAt: rawDoc["updatedAt"].(primitive.DateTime).Time(),
+		ID:          rawDoc["_id"].(primitive.ObjectID),
+		Text:        rawDoc["text"].(string),
+		EncodedText: et,
+		Image:       image,
+		Sent:        rawDoc["sent"].(bool),
+		Received:    rawDoc["received"].(bool),
+		System:      rawDoc["system"].(bool),
+		User:        primitive.NilObjectID,
+		Chat:        rawDoc["chat"].(primitive.ObjectID),
+		CreatedAt:   rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt:   rawDoc["updatedAt"].(primitive.DateTime).Time(),
 	}
 }

@@ -8,6 +8,7 @@ type RegisterInputDto struct {
 	Name      string `json:"name" validate:"required,min=2"`
 	Password  string `json:"password" validate:"required,min=6"`
 	AvatarUri string `json:"avatarUri" validate:"url|uri|base64url"`
+	SpAddress string `json:"spAddress" validate:"required,min=2"`
 }
 
 // RegisterOutputDto
@@ -30,30 +31,23 @@ type LoginOutputDto struct {
 
 // UserInfoOutputDto
 type UserInfoOutputDto struct {
-	ID        string `json:"_id"`
-	Name      string `json:"name"`
-	AvatarUri string `json:"avatarUri"`
-
-	Contacts []primitive.ObjectID `json:"contacts"`
-	Chats    []primitive.ObjectID `json:"chats"`
-
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	ID        string               `json:"_id"`
+	Name      string               `json:"name"`
+	AvatarUri string               `json:"avatarUri"`
+	Contacts  []primitive.ObjectID `json:"contacts"`
+	Chats     []primitive.ObjectID `json:"chats"`
+	CreatedAt string               `json:"createdAt"`
+	UpdatedAt string               `json:"updatedAt"`
 }
 
 // UserInfoExtendedOutputDto
 type UserInfoExtendedOutputDto struct {
-	ID        string `json:"_id"`
-	Name      string `json:"name"`
-	AvatarUri string `json:"avatarUri"`
-
+	*UserInfoOutputDto
 	Contacts []UserInfoExtendedOutputDto `json:"contacts"`
 	Chats    []ChatOutputDto             `json:"chats"`
-
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
 }
 
+// -- Add Contact
 // AddContactInputDto
 type AddContactInputDto struct {
 	UserName string `json:"username" validate:"required,min=2"`
@@ -65,6 +59,7 @@ type AddChatInputDto struct {
 	ChatName string `json:"chatName"`
 }
 
+// -- Add Chat
 // ChatOutputDto
 type ChatOutputDto struct {
 	ID          string               `json:"_id"`
@@ -79,20 +74,17 @@ type ChatOutputDto struct {
 
 // ChatExtendedOutputDto
 type ChatExtendedOutputDto struct {
-	ID          string              `json:"_id"`
-	Name        string              `json:"name"`
-	IconUri     string              `json:"iconUri"`
-	Muted       bool                `json:"muted"`
+	*ChatOutputDto
 	Users       []UserInfoOutputDto `json:"users"`
 	LastMessage MessageOutputDto    `json:"lastMessage"`
-	CreatedAt   string              `json:"createdAt"`
-	UpdatedAt   string              `json:"updatedAt"`
 }
 
+// -- New Message
 // NewMessageInputDto
 type NewMessageInputDto struct {
-	Text  string `json:"text" validate:"required,min=1"`
-	Image string `json:"image"`
+	Text        string `json:"text" validate:"required,min=1"`
+	EncodedText string `json:"encodedText" validate:"required,min=1"`
+	Image       string `json:"image"`
 	// Image string `json:"image" validate:"required_without=text,url|uri|base64url"`
 }
 
@@ -103,28 +95,40 @@ type NewMessageOutputDto struct {
 
 // MessageOutputDto
 type MessageOutputDto struct {
-	ID        string             `json:"_id"`
-	Text      string             `json:"text"`
-	Image     string             `json:"image"`
-	Sent      bool               `json:"sent"`
-	Received  bool               `json:"received"`
-	System    bool               `json:"system"`
-	User      primitive.ObjectID `json:"user"`
-	Chat      primitive.ObjectID `json:"chat"`
-	CreatedAt string             `json:"createdAt"`
-	UpdatedAt string             `json:"updatedAt"`
+	ID          string             `json:"_id"`
+	Text        string             `json:"text"`
+	EncodedText string             `json:"encodedText"`
+	Image       string             `json:"image"`
+	Sent        bool               `json:"sent"`
+	Received    bool               `json:"received"`
+	System      bool               `json:"system"`
+	User        primitive.ObjectID `json:"user"`
+	Chat        primitive.ObjectID `json:"chat"`
+	CreatedAt   string             `json:"createdAt"`
+	UpdatedAt   string             `json:"updatedAt"`
 }
 
 // MessageExtendedOutputDto
 type MessageExtendedOutputDto struct {
-	ID        string             `json:"_id"`
-	Text      string             `json:"text"`
-	Image     string             `json:"image"`
-	Sent      bool               `json:"sent"`
-	Received  bool               `json:"received"`
-	System    bool               `json:"system"`
-	User      *UserInfoOutputDto `json:"user"`
-	Chat      primitive.ObjectID `json:"chat"`
-	CreatedAt string             `json:"createdAt"`
-	UpdatedAt string             `json:"updatedAt"`
+	*MessageOutputDto
+	User *UserInfoOutputDto `json:"user"`
+}
+
+// -- Signal pre-keys
+// PublishKeysDto
+type PublishKeysDto struct {
+	RegistrationId int                 `json:"registrationId" bson:"registrationId" validate:"required"`
+	IdentityPubKey []int               `json:"identityPubKey" bson:"identityPubKey" validate:"required"`
+	SignedPreKey   *SignedPreKey       `json:"signedPreKey" bson:"signedPreKey" validate:"required"`
+	OneTimePreKeys []OneTimePreKeyItem `json:"oneTimePreKeys" bson:"oneTimePreKeys" validate:"required"`
+}
+
+type SignedPreKey struct {
+	KeyId     int   `json:"keyId" bson:"keyId" validate:"required"`
+	PublicKey []int `json:"publicKey" bson:"publicKey" validate:"required"`
+	Signature []int `json:"signature" bson:"signature" validate:"required"`
+}
+type OneTimePreKeyItem struct {
+	KeyId     int   `json:"keyId" bson:"keyId" validate:"required"`
+	PublicKey []int `json:"publicKey" bson:"publicKey" validate:"required"`
 }

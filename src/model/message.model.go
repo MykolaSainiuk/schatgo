@@ -7,9 +7,10 @@ import (
 )
 
 type Message struct {
-	ID    primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Text  string             `json:"text" bson:"text"`
-	Image string             `json:"image" bson:"image"`
+	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Text        string             `json:"text" bson:"text"`
+	EncodedText string             `json:"encodedText" bson:"encodedText"`
+	Image       string             `json:"image" bson:"image"`
 
 	Sent     bool `json:"sent" bson:"sent"`
 	Received bool `json:"received" bson:"received"`

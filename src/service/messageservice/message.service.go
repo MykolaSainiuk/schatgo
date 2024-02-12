@@ -39,15 +39,16 @@ func (service *MessageService) NewMessage(ctx context.Context, chatId string, us
 
 	_userId, _ := primitive.ObjectIDFromHex(userId)
 	newMessage := &model.Message{
-		Text:      data.Text,
-		Image:     data.Image,
-		Sent:      true,
-		Received:  true,
-		System:    false,
-		User:      _userId,
-		Chat:      _chatId,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Text:        data.Text,
+		Image:       data.Image,
+		EncodedText: data.EncodedText,
+		Sent:        true,
+		Received:    true,
+		System:      false,
+		User:        _userId,
+		Chat:        _chatId,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	newMessageId, err := service.messageRepo.SaveMessage(ctx, newMessage)

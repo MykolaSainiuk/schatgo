@@ -18,7 +18,7 @@ import (
 )
 
 type ContactHandler struct {
-	UserService *userservice.UserService
+	userService *userservice.UserService
 }
 
 func NewContactHandler(srv types.IServer) *ContactHandler {
@@ -56,7 +56,7 @@ func (handler *ContactHandler) AddContact(w http.ResponseWriter, r *http.Request
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
 
-	err := handler.UserService.AddContact(ctx, userID, body.UserName)
+	err := handler.userService.AddContact(ctx, userID, body.UserName)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
 			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)
@@ -67,7 +67,7 @@ func (handler *ContactHandler) AddContact(w http.ResponseWriter, r *http.Request
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(nil)
+	w.Write(cmnerr.EmptyJSONResponse)
 }
 
 // ListAllContacts method
@@ -84,7 +84,7 @@ func (handler *ContactHandler) ListAllContacts(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
 
-	contacts, err := handler.UserService.GetAllUsers(ctx, userID)
+	contacts, err := handler.userService.GetAllUsers(ctx, userID)
 
 	renderContacts(w, contacts, err)
 }
@@ -114,7 +114,7 @@ func (handler *ContactHandler) ListContactsPaginated(w http.ResponseWriter, r *h
 		limit = 10
 	}
 
-	contacts, err := handler.UserService.GetContactsPaginated(ctx, userID, types.PaginationParams{
+	contacts, err := handler.userService.GetContactsPaginated(ctx, userID, types.PaginationParams{
 		Page:  int(page),
 		Limit: int(limit),
 	})

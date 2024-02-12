@@ -92,7 +92,7 @@ func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ..
 	}
 	lookup2 := bson.D{{Key: "$lookup", Value: ls2}}
 	// {Key: "preserveNullAndEmptyArrays", Value: true}
-	unwind2 := bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$lastMessage"}}}}
+	unwind2 := bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$lastMessage"}, {Key: "preserveNullAndEmptyArrays", Value: true}}}}
 
 	pipelineStages := mongo.Pipeline{match, lookup1, lookup2, unwind2}
 
@@ -135,11 +135,15 @@ func (repo *ChatRepo) GetChatsByUserID(ctx context.Context, id string, params ..
 		}
 
 		rawLM := chat["lastMessage"]
+		var lm *model.Message
+		if rawLM != nil  {
+			lm = repohelper.RawPlainDocToMessageModel(rawLM.(primitive.D).Map())
+		}
 
 		chatsPopulated = append(chatsPopulated, model.ChatPopulated{
 			Chat:        repohelper.RawDocToChatModel(chat),
 			Users:       users,
-			LastMessage: repohelper.RawPlainDocToMessageModel(rawLM.(primitive.D).Map()),
+			LastMessage: lm,
 		})
 	}
 

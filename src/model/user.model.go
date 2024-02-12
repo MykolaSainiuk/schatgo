@@ -11,7 +11,9 @@ type User struct {
 	Name      string             `json:"name,omitempty" bson:"name"`
 	AvatarUri string             `json:"avatarUri,omitempty" bson:"avatarUri"`
 
-	Hash string `json:"-" bson:"hash"`
+	Hash               string `json:"-" bson:"hash"`
+	SpAddress          string `json:"spAddress" bson:"spAddress"`
+	PublicSignedPreKey *any    `json:"-" bson:"publicSignedPreKey"`
 
 	Contacts []primitive.ObjectID `json:"contacts" bson:"contacts"`
 	Chats    []primitive.ObjectID `json:"chats" bson:"chats"`

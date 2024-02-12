@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/cmnerr"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
@@ -50,15 +51,14 @@ func (repo *UserRepo) GetUserByID(ctx context.Context, id string) (*model.User, 
 	_id, _ := primitive.ObjectIDFromHex(id)
 
 	var user *model.User
-	var err error
-	if err = repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}).Decode(&user); err != nil || user == nil {
+	if err := repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}).Decode(&user); err != nil || user == nil {
 		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
 			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
 		}
 		return nil, fmt.Errorf("cannot retrieve user from users collection: %w", err)
 	}
 
-	return user, err
+	return user, nil
 }
 
 func (repo *UserRepo) GetUserByIdPopulated(ctx context.Context, id string) (*model.UserPopulated, error) {
@@ -278,4 +278,91 @@ func (repo *UserRepo) GetAllUsers(ctx context.Context, userID string) ([]model.U
 	}
 
 	return users, nil
+}
+
+func (repo *UserRepo) SetPublicPresignedKeys(ctx context.Context, userID string, data *dto.PublishKeysDto) error {
+	_usrId, _ := primitive.ObjectIDFromHex(userID)
+	r, err := repo.collection.UpdateByID(ctx, _usrId, bson.D{{
+		Key:   "$set",
+		Value: primitive.D{{Key: "publicSignedPreKey", Value: data}},
+	}})
+	if err != nil {
+		return fmt.Errorf("cannot update user of users collection: %w", err)
+	}
+	if r.MatchedCount == 0 {
+		return errors.Join(cmnerr.ErrNotFoundEntity, err)
+	}
+
+	slog.Debug("updated user public pre-keys", slog.String("ID", userID))
+	return nil
+}
+
+func (repo *UserRepo) GetUserPublicPreKeys(ctx context.Context, id string) (*dto.PublishKeysDto, error) {
+	_id, _ := primitive.ObjectIDFromHex(id)
+
+	record := repo.collection.FindOne(ctx, bson.D{{Key: "_id", Value: _id}}, options.FindOne().SetProjection(bson.D{
+		{Key: "publicSignedPreKey", Value: 1},
+	}))
+
+	var user any
+	if err := record.Decode(&user); err != nil || user == nil {
+		if errors.Is(err, mongo.ErrNoDocuments) || user == nil {
+			return nil, errors.Join(cmnerr.ErrNotFoundEntity, err)
+		}
+		return nil, fmt.Errorf("cannot retrieve user from users collection: %w", err)
+	}
+
+	um, _ := user.(primitive.D)
+	preKeysRaw, ok := um.Map()["publicSignedPreKey"]
+	if !ok || preKeysRaw == nil {
+		slog.Debug("found user object does not have pre-keys")
+		return nil, nil
+	}
+
+	pkr, ok := preKeysRaw.(primitive.D)
+	if !ok {
+		return nil, errors.New("cannot cast return user object to pre-keys")
+	}
+	r := pkr.Map()
+	spkObj := r["signedPreKey"].(primitive.D).Map()
+
+	pkRaw, _ := spkObj["publicKey"].(primitive.A)
+	pk := make([]int, 0, len(pkRaw))
+	for _, v := range pkRaw {
+		pk = append(pk, int(v.(int32)))
+	}
+	sRaw, _ := spkObj["signature"].(primitive.A)
+	s := make([]int, 0, len(sRaw))
+	for _, v := range sRaw {
+		s = append(s, int(v.(int32)))
+	}
+	spk := dto.SignedPreKey{
+		KeyId:     int(spkObj["keyId"].(int32)),
+		PublicKey: pk,
+		Signature: s,
+	}
+
+	otpkFirst := r["oneTimePreKeys"].(primitive.A)[0].(primitive.D).Map()
+	pkRaw, _ = otpkFirst["publicKey"].(primitive.A)
+	pk = make([]int, 0, len(pkRaw))
+	for _, v := range pkRaw {
+		pk = append(pk, int(v.(int32)))
+	}
+	otpkItem := dto.OneTimePreKeyItem{
+		KeyId:     int(otpkFirst["keyId"].(int32)),
+		PublicKey: pk,
+	}
+
+	ipkRaw, _ := r["identityPubKey"].(primitive.A)
+	ipk := make([]int, 0, len(ipkRaw))
+	for _, v := range ipkRaw {
+		ipk = append(ipk, int(v.(int32)))
+	}
+
+	return &dto.PublishKeysDto{
+		RegistrationId: int(r["registrationId"].(int32)),
+		IdentityPubKey: ipk,
+		SignedPreKey:   &spk,
+		OneTimePreKeys: []dto.OneTimePreKeyItem{otpkItem},
+	}, nil
 }

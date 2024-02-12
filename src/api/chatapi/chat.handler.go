@@ -21,8 +21,8 @@ import (
 )
 
 type ChatHandler struct {
-	ChatService    *chatservice.ChatService
-	MessageService *messageservice.MessageService
+	chatService    *chatservice.ChatService
+	messageService *messageservice.MessageService
 }
 
 func NewChatHandler(srv types.IServer) *ChatHandler {
@@ -61,7 +61,7 @@ func (handler *ChatHandler) NewChat(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
 
-	newChat, err := handler.ChatService.CreateChat(ctx, userID, &body)
+	newChat, err := handler.chatService.CreateChat(ctx, userID, &body)
 	if err != nil {
 		if errors.Is(err, cmnerr.ErrNotFoundEntity) {
 			httpexp.From(err, "user not found", http.StatusNotFound).Reply(w)
@@ -89,7 +89,7 @@ func (handler *ChatHandler) ListAllChats(w http.ResponseWriter, r *http.Request)
 	ctx := r.Context()
 	userID := ctx.Value(types.TokenPayload{}).(*types.TokenPayload).UserID
 
-	chats, err := handler.ChatService.GetAllChats(ctx, userID)
+	chats, err := handler.chatService.GetAllChats(ctx, userID)
 
 	renderChats(w, chats, err)
 }
@@ -118,7 +118,7 @@ func (handler *ChatHandler) ListChatsPaginated(w http.ResponseWriter, r *http.Re
 		limit = 10
 	}
 
-	chats, err := handler.ChatService.GetChatsPaginated(ctx, userID, types.PaginationParams{
+	chats, err := handler.chatService.GetChatsPaginated(ctx, userID, types.PaginationParams{
 		Page:  int(page),
 		Limit: int(limit),
 	})
@@ -150,19 +150,19 @@ func (handler *ChatHandler) ClearChat(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	chatId := chi.URLParam(r, "chatId")
 
-	if err := handler.MessageService.ClearChatMessages(ctx, chatId); err != nil {
+	if err := handler.messageService.ClearChatMessages(ctx, chatId); err != nil {
 		cmnerr.Reply500(w, err)
 		return
 	}
 
 	_chatId, _ := primitive.ObjectIDFromHex(chatId)
-	if err := handler.ChatService.SetLastMessage(ctx, _chatId, primitive.NilObjectID); err != nil {
+	if err := handler.chatService.SetLastMessage(ctx, _chatId, primitive.NilObjectID); err != nil {
 		cmnerr.Reply500(w, err)
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-	w.Write(nil)
+	w.Write(cmnerr.EmptyJSONResponse)
 }
 
 const (

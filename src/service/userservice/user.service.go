@@ -3,6 +3,7 @@ package userservice
 import (
 	"context"
 
+	"github.com/MykolaSainiuk/schatgo/src/api/dto"
 	"github.com/MykolaSainiuk/schatgo/src/common/types"
 	"github.com/MykolaSainiuk/schatgo/src/model"
 	"github.com/MykolaSainiuk/schatgo/src/repo/userrepo"
@@ -49,4 +50,12 @@ func (service *UserService) GetContactsPaginated(ctx context.Context, userID str
 
 func (service *UserService) RegisterNewChat(ctx context.Context, chatID primitive.ObjectID, userID string, anotherUserID string) error {
 	return service.userRepo.AddChatIdToUsers(ctx, chatID, userID, anotherUserID)
+}
+
+func (service *UserService) SetPreSignedKeys(ctx context.Context, userID string, data *dto.PublishKeysDto) error {
+	return service.userRepo.SetPublicPresignedKeys(ctx, userID, data)
+}
+
+func (service *UserService) GetUserPreKeys(ctx context.Context, userID string) (*dto.PublishKeysDto, error) {
+	return service.userRepo.GetUserPublicPreKeys(ctx, userID)
 }

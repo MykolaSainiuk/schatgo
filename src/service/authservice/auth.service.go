@@ -42,6 +42,7 @@ func (service *AuthService) RegisterNewUser(ctx context.Context, dto *dto.Regist
 		AvatarUri: dto.AvatarUri,
 
 		Hash: hash,
+		SpAddress: dto.SpAddress,
 
 		Contacts: make([]primitive.ObjectID, 0),
 		Chats:    make([]primitive.ObjectID, 0),
