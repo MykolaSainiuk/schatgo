@@ -72,9 +72,10 @@ func (srv *Server) GetDB() types.IDatabase {
 func init() {
 	// evn vars load
 	envFilePath := getEnvFilePath()
+	slog.Info("loading .env file", slog.String("path", envFilePath))
 	if err := godotenv.Load(envFilePath); err != nil {
 		slog.Error(".env file not found")
-		os.Exit(1)
+		// os.Exit(1)
 	}
 	slog.Info(".env file is loaded")
 
