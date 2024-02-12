@@ -13,7 +13,7 @@ COPY ./main.go ./
 
 RUN go build -o ./bin
 
-EXPOSE 8000
+EXPOSE 8080
 
 RUN chmod +x /bin
 
