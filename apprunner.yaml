@@ -1,0 +1,35 @@
+version: 1.0
+runtime: go1
+build:
+  commands:
+    build:        
+      - go build -o "./bin"
+run:
+  runtime-version: 1.21.6
+  command: ./bin
+  network: 
+    port: 8080
+    env: PORT
+  env:
+    - name: HOST
+      value: "0.0.0.0"
+    - name: PORT
+      value: 8080
+    - name: NODE_ENV
+      value: "development"
+    - name: DB_NAME
+      value: "schats"
+    - name: MONGO_INITDB_DATABASE
+      value: "schats"
+    - name: MONGO_INITDB_ROOT_DATABASE
+      value: "schats"
+    - name: MONGO_INITDB_ROOT_USERNAME
+      value: "schats_user"
+    - name: MONGO_INITDB_ROOT_PASSWORD
+      value: "schats"
+    - name: MONGO_URI
+      value: "mongodb+srv://schats_user:secureasshit@schatdb.bengwfx.mongodb.net/?retryWrites=true&w=majority"
+    - name: JWT_SECRET_KEY
+      value: "TMCJeNzVjJnlzF5vi0K5JOQEdwkC7EZx"
+    - name: ACCESS_TOKEN_EXPIRATION_SECONDS
+      value: 3600
