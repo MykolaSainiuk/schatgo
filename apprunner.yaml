@@ -5,7 +5,7 @@ build:
     build:        
       - go build -o "./bin"
 run:
-  runtime-version: 1.21.6
+  # runtime-version: 1.21.6
   command: ./bin
   network: 
     port: 8080
