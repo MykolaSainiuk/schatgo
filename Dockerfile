@@ -18,7 +18,4 @@ EXPOSE 8000
 RUN chmod +x /bin
 
 CMD [ "./bin" ]
-
-EXPOSE 8080
-
 # CMD [ "go", "run", "main.go" ]
