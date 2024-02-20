@@ -697,7 +697,7 @@
                 "createdAt": {
                     "type": "string"
                 },
-                "encodedText": {
+                "encryptedText": {
                     "type": "string"
                 },
                 "image": {
@@ -726,11 +726,11 @@
         "dto.NewMessageInputDto": {
             "type": "object",
             "required": [
-                "encodedText",
+                "encryptedText",
                 "text"
             ],
             "properties": {
-                "encodedText": {
+                "encryptedText": {
                     "type": "string",
                     "minLength": 1
                 },

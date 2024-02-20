@@ -22,7 +22,7 @@ type Database struct {
 	Collections map[string]*mongo.Collection
 }
 
-const DB_CONN_TIMEOUT int = 10
+const DB_CONN_TIMEOUT int = 30
 
 func ConnectDB(dbName string) (*Database, error) {
 	conn := options.Client().ApplyURI(os.Getenv("MONGO_URI"))
@@ -33,7 +33,7 @@ func ConnectDB(dbName string) (*Database, error) {
 	var client *mongo.Client
 	// simply establish connection
 	if client, err = mongo.Connect(dbConnCtx, conn); err != nil {
-		slog.Error("Cannot connect MongoDb instance", slog.Any("error", err.Error()))
+		slog.Error("cannot connect MongoDb instance", slog.Any("error", err.Error()))
 		dbConnCancelFn()
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func ConnectDB(dbName string) (*Database, error) {
 	// "migrations"
 	collections, err := RollUpAndGetCollections(dbConnCtx, dbInst, dbName)
 	if err != nil {
-		slog.Error("Cannot roll up MongoDB metadata", slog.Any("error", err.Error()))
+		slog.Error("cannot roll up MongoDB metadata", slog.Any("error", err.Error()))
 		dbConnCancelFn()
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func RollUpAndGetCollections(ctx context.Context, db *mongo.Database, dbName str
 	}
 	_, err := db.Collection("users").Indexes().CreateOne(ctx, indexModel0)
 	if err != nil {
-		slog.Error("Cannot create unique index for users collection", slog.Any("error", err.Error()))
+		slog.Error("cannot create unique index for users collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 
@@ -100,7 +100,7 @@ func RollUpAndGetCollections(ctx context.Context, db *mongo.Database, dbName str
 	}
 	_, err = tokenIndices.CreateOne(ctx, indexModel1)
 	if err != nil {
-		slog.Error("Cannot create unique index for tokens collection", slog.Any("error", err.Error()))
+		slog.Error("cannot create unique index for tokens collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 
@@ -114,7 +114,7 @@ func RollUpAndGetCollections(ctx context.Context, db *mongo.Database, dbName str
 	}
 	_, err = tokenIndices.CreateOne(ctx, indexModel2)
 	if err != nil {
-		slog.Error("Cannot create time-series index for tokens collection", slog.Any("error", err.Error()))
+		slog.Error("cannot create time-series index for tokens collection", slog.Any("error", err.Error()))
 		return nil, err
 	}
 

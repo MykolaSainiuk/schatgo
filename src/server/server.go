@@ -14,6 +14,7 @@ import (
 	"github.com/MykolaSainiuk/schatgo/src/db"
 	"github.com/MykolaSainiuk/schatgo/src/helper/jwthelper"
 	"github.com/MykolaSainiuk/schatgo/src/server/router"
+	"github.com/MykolaSainiuk/schatgo/src/util"
 )
 
 type Server struct {
@@ -22,7 +23,10 @@ type Server struct {
 }
 
 func Setup() types.IServer {
-	dbConn, err := db.ConnectDB(os.Getenv("MONGO_INITDB_DATABASE"))
+	ip := util.GetOutboundIP()
+	slog.Info("Current IP is", ip)
+
+	dbConn, err := db.ConnectDB(os.Getenv("DB_NAME"))
 	if err != nil {
 		slog.Error("failed to connect MongoDB", slog.Any("error", err.Error()))
 		os.Exit(1)

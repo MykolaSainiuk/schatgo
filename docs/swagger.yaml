@@ -64,7 +64,7 @@ definitions:
         type: string
       createdAt:
         type: string
-      encodedText:
+      encryptedText:
         type: string
       image:
         type: string
@@ -83,7 +83,7 @@ definitions:
     type: object
   dto.NewMessageInputDto:
     properties:
-      encodedText:
+      encryptedText:
         minLength: 1
         type: string
       image:
@@ -92,7 +92,7 @@ definitions:
         minLength: 1
         type: string
     required:
-    - encodedText
+    - encryptedText
     - text
     type: object
   dto.NewMessageOutputDto:

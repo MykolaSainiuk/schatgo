@@ -1,5 +1,12 @@
 ./build
-./vscode
+./.vscode
 ./docs
 ./thunder*
 ./bin
+./.env
+./docker-compose.yml
+./cmd
+./mongo-init.sh
+./.git
+./.gitignore
+./.dockerignore

@@ -105,23 +105,23 @@ func RawPlainDocToMessageModel(rawDoc map[string]any) *model.Message {
 	if !ok {
 		image = ""
 	}
-	et, ok := rawDoc["encodedText"].(string)
+	et, ok := rawDoc["encryptedText"].(string)
 	if !ok {
 		et = ""
 	}
 
 	return &model.Message{
-		ID:          rawDoc["_id"].(primitive.ObjectID),
-		Text:        rawDoc["text"].(string),
-		EncodedText: et,
-		Image:       image,
-		Sent:        rawDoc["sent"].(bool),
-		Received:    rawDoc["received"].(bool),
-		System:      rawDoc["system"].(bool),
-		User:        rawDoc["user"].(primitive.ObjectID),
-		Chat:        rawDoc["chat"].(primitive.ObjectID),
-		CreatedAt:   rawDoc["createdAt"].(primitive.DateTime).Time(),
-		UpdatedAt:   rawDoc["updatedAt"].(primitive.DateTime).Time(),
+		ID:            rawDoc["_id"].(primitive.ObjectID),
+		Text:          rawDoc["text"].(string),
+		EncryptedText: et,
+		Image:         image,
+		Sent:          rawDoc["sent"].(bool),
+		Received:      rawDoc["received"].(bool),
+		System:        rawDoc["system"].(bool),
+		User:          rawDoc["user"].(primitive.ObjectID),
+		Chat:          rawDoc["chat"].(primitive.ObjectID),
+		CreatedAt:     rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt:     rawDoc["updatedAt"].(primitive.DateTime).Time(),
 	}
 }
 
@@ -134,22 +134,22 @@ func RawDocToMessageModel(rawDoc map[string]any) *model.Message {
 	if !ok {
 		image = ""
 	}
-	et, ok := rawDoc["encodedText"].(string)
+	et, ok := rawDoc["encryptedText"].(string)
 	if !ok {
 		et = ""
 	}
 
 	return &model.Message{
-		ID:          rawDoc["_id"].(primitive.ObjectID),
-		Text:        rawDoc["text"].(string),
-		EncodedText: et,
-		Image:       image,
-		Sent:        rawDoc["sent"].(bool),
-		Received:    rawDoc["received"].(bool),
-		System:      rawDoc["system"].(bool),
-		User:        primitive.NilObjectID,
-		Chat:        rawDoc["chat"].(primitive.ObjectID),
-		CreatedAt:   rawDoc["createdAt"].(primitive.DateTime).Time(),
-		UpdatedAt:   rawDoc["updatedAt"].(primitive.DateTime).Time(),
+		ID:            rawDoc["_id"].(primitive.ObjectID),
+		Text:          rawDoc["text"].(string),
+		EncryptedText: et,
+		Image:         image,
+		Sent:          rawDoc["sent"].(bool),
+		Received:      rawDoc["received"].(bool),
+		System:        rawDoc["system"].(bool),
+		User:          primitive.NilObjectID,
+		Chat:          rawDoc["chat"].(primitive.ObjectID),
+		CreatedAt:     rawDoc["createdAt"].(primitive.DateTime).Time(),
+		UpdatedAt:     rawDoc["updatedAt"].(primitive.DateTime).Time(),
 	}
 }

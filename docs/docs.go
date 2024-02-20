@@ -703,7 +703,7 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
-                "encodedText": {
+                "encryptedText": {
                     "type": "string"
                 },
                 "image": {
@@ -732,11 +732,11 @@ const docTemplate = `{
         "dto.NewMessageInputDto": {
             "type": "object",
             "required": [
-                "encodedText",
+                "encryptedText",
                 "text"
             ],
             "properties": {
-                "encodedText": {
+                "encryptedText": {
                     "type": "string",
                     "minLength": 1
                 },

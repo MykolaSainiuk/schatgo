@@ -82,9 +82,9 @@ type ChatExtendedOutputDto struct {
 // -- New Message
 // NewMessageInputDto
 type NewMessageInputDto struct {
-	Text        string `json:"text" validate:"required,min=1"`
-	EncodedText string `json:"encodedText" validate:"required,min=1"`
-	Image       string `json:"image"`
+	Text          string `json:"text" validate:"required,min=1"`
+	EncryptedText string `json:"encryptedText" validate:"required,min=1"`
+	Image         string `json:"image"`
 	// Image string `json:"image" validate:"required_without=text,url|uri|base64url"`
 }
 
@@ -95,17 +95,17 @@ type NewMessageOutputDto struct {
 
 // MessageOutputDto
 type MessageOutputDto struct {
-	ID          string             `json:"_id"`
-	Text        string             `json:"text"`
-	EncodedText string             `json:"encodedText"`
-	Image       string             `json:"image"`
-	Sent        bool               `json:"sent"`
-	Received    bool               `json:"received"`
-	System      bool               `json:"system"`
-	User        primitive.ObjectID `json:"user"`
-	Chat        primitive.ObjectID `json:"chat"`
-	CreatedAt   string             `json:"createdAt"`
-	UpdatedAt   string             `json:"updatedAt"`
+	ID            string             `json:"_id"`
+	Text          string             `json:"text"`
+	EncryptedText string             `json:"encryptedText"`
+	Image         string             `json:"image"`
+	Sent          bool               `json:"sent"`
+	Received      bool               `json:"received"`
+	System        bool               `json:"system"`
+	User          primitive.ObjectID `json:"user"`
+	Chat          primitive.ObjectID `json:"chat"`
+	CreatedAt     string             `json:"createdAt"`
+	UpdatedAt     string             `json:"updatedAt"`
 }
 
 // MessageExtendedOutputDto
